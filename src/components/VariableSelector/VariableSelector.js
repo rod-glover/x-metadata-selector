@@ -1,17 +1,33 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import Select from 'react-select';
+import Select, { components } from 'react-select';
+import { Glyphicon } from 'react-bootstrap';
 
 import flow from 'lodash/fp/flow';
 import identity from 'lodash/fp/identity';
 import map from 'lodash/fp/map';
 import filter from 'lodash/fp/filter';
-import join from 'lodash/fp/join';
 import pick from 'lodash/fp/pick';
 import sortBy from 'lodash/fp/sortBy';
 import uniqBy from 'lodash/fp/uniqBy';
 
+import tap from 'lodash/fp/tap';
+
 import './VariableSelector.css';
+
+
+const { Option } = components;
+
+const MyOption = props => {
+  console.log('MyOption', props)
+  return (
+  <Option {...props}>
+    <Glyphicon glyph={props.value.multi_year_mean ? 'repeat' : 'star'}/>
+    {' '}
+    {props.label}
+  </Option>
+)};
+
 
 export default class VariableSelector extends React.Component {
   static propTypes = {
@@ -21,16 +37,19 @@ export default class VariableSelector extends React.Component {
   static variable_props =
     'variable_id variable_name multi_year_mean'.split(' ');
 
-  // concatProps = obj => flow(map(identity), join(' '))(obj);
-  optionValueToLabel = ({ variable_id, variable_name, multi_year_mean }) =>
-    `(${multi_year_mean ? '' : 'not '}MYM) ${variable_id} - ${variable_name}`;
-  getOptionLabel = option => this.optionValueToLabel(option.value);
+
+  optionValueToLabel = ({ variable_id, variable_name }) =>
+    `${variable_id} - ${variable_name}`;
 
   render() {
     const allOptions = flow(
-      uniqBy(this.optionValueToLabel),
-      map(m => (
-        { value: pick(VariableSelector.variable_props)(m) }
+      map(pick(VariableSelector.variable_props)),
+      uniqBy(JSON.stringify),
+      map(value => (
+        {
+          value,
+          label: this.optionValueToLabel(value),
+        }
       )),
       sortBy('value.variable_id'),
     )(this.props.meta);
@@ -51,7 +70,7 @@ export default class VariableSelector extends React.Component {
       <Select
         isSearchable
         options={options}
-        getOptionLabel={this.getOptionLabel}
+        components={{ Option: MyOption }}
       />
     );
   }
