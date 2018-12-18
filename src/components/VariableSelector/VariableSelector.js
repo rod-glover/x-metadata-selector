@@ -5,6 +5,7 @@ import Select from 'react-select';
 import flow from 'lodash/fp/flow';
 import identity from 'lodash/fp/identity';
 import map from 'lodash/fp/map';
+import filter from 'lodash/fp/filter';
 import join from 'lodash/fp/join';
 import pick from 'lodash/fp/pick';
 import sortBy from 'lodash/fp/sortBy';
@@ -26,13 +27,25 @@ export default class VariableSelector extends React.Component {
   getOptionLabel = option => this.optionValueToLabel(option.value);
 
   render() {
-    const options = flow(
+    const allOptions = flow(
       uniqBy(this.optionValueToLabel),
       map(m => (
         { value: pick(VariableSelector.variable_props)(m) }
       )),
       sortBy('value.variable_id'),
     )(this.props.meta);
+    const mymOptions = filter(o => o.value.multi_year_mean)(allOptions);
+    const notMymOptions = filter(o => !o.value.multi_year_mean)(allOptions);
+    const options = [
+      {
+        label: 'Multi-Year Mean Datasets',
+        options: mymOptions,
+      },
+      {
+        label: 'Time Series Datasets',
+        options: notMymOptions,
+      },
+    ];
 
     return (
       <Select
