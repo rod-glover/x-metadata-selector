@@ -5,6 +5,7 @@ import Select from 'react-select';
 import flow from 'lodash/fp/flow';
 import map from 'lodash/fp/map';
 import pick from 'lodash/fp/pick';
+import sortBy from 'lodash/fp/sortBy';
 import uniqBy from 'lodash/fp/uniqBy';
 
 import './VariableSelector.css';
@@ -23,7 +24,8 @@ export default class VariableSelector extends React.Component {
       uniqBy(this.optionValueToLabel),
       map(m => (
         { value: pick(['variable_id', 'variable_name'])(m) }
-      ))
+      )),
+      sortBy('value.variable_id'),
     )(this.props.meta);
 
     return (
