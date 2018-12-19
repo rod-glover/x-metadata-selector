@@ -3,7 +3,7 @@ import React from 'react';
 import Select, { components } from 'react-select';
 import { Glyphicon } from 'react-bootstrap';
 
-import memoize from "memoize-one";
+import memoize from 'memoize-one';
 
 import {
   curry,
@@ -19,16 +19,17 @@ import {
   groupBy,
   toPairs,
   some,
-} from 'lodash/fp'
+  tap,
+} from 'lodash/fp';
 
-import tap from 'lodash/fp/tap';
+import objectId from '../../debug-utils/object-id';
 
 import './VariableSelector.css';
 
 const { Option } = components;
 
 const MyOption = props => {
-  // console.log('MyOption', props)
+  // console.log('VS.MyOption', props)
   return (
   <Option {...props}>
     <Glyphicon glyph={props.value.multi_year_mean ? 'repeat' : 'star'}/>
@@ -36,14 +37,6 @@ const MyOption = props => {
     {props.label}
   </Option>
 )};
-
-
-const objectIdMap = new WeakMap();
-let objectCount = 0;
-function objectId(object){
-  if (!objectIdMap.has(object)) objectIdMap.set(object, ++objectCount);
-  return objectIdMap.get(object);
-}
 
 
 export default class VariableSelector extends React.Component {
@@ -60,19 +53,19 @@ export default class VariableSelector extends React.Component {
 
   constructor(props) {
     super(props);
-    console.log('cons: meta:', objectId(props.meta))
-    console.log('cons: constraint:', objectId(props.constraint))
+    console.log('VS.cons: meta:', objectId(props.meta))
+    console.log('VS.cons: constraint:', objectId(props.constraint))
   }
 
   componentDidMount() {
-    console.log('componentDidMount')
+    console.log('VS.componentDidMount')
   }
 
   componentDidUpdate(prevProps) {
-    console.log('cDU: meta:', objectId(this.props.meta))
-    console.log('cDU: constraint:', objectId(this.props.constraint))
-    console.log(`componentDidMount: props.meta ${this.props.meta === prevProps.meta ? '===' : '!=='} prevProps.meta`)
-    console.log(`componentDidMount: props.constraint ${this.props.constraint === prevProps.constraint ? '===' : '!=='} prevProps.constraint`)
+    console.log('VS.cDU: meta:', objectId(this.props.meta))
+    console.log('VS.cDU: constraint:', objectId(this.props.constraint))
+    console.log(`VS.componentDidMount: props.meta ${this.props.meta === prevProps.meta ? '===' : '!=='} prevProps.meta`)
+    console.log(`VS.componentDidMount: props.constraint ${this.props.constraint === prevProps.constraint ? '===' : '!=='} prevProps.constraint`)
   }
 
   static contextProps =
@@ -140,7 +133,7 @@ export default class VariableSelector extends React.Component {
   // is called more than once per consecutive unique argument. WTF?
   allOptions = memoize(
     meta => flow(
-      tap(meta => console.log('allOptions: meta:', objectId(meta))),
+      tap(meta => console.log('VS.allOptions: meta:', objectId(meta))),
       map(m => ({
         context: pick(VariableSelector.contextProps)(m),
         value: pick(VariableSelector.variableProps)(m),
@@ -154,7 +147,7 @@ export default class VariableSelector extends React.Component {
         }
       )),
       sortBy('value.variable_id'),
-      // tap(m => console.log('allOptions', m)),
+      // tap(m => console.log('VS.allOptions', m)),
     )(meta)
   );
 
@@ -168,8 +161,8 @@ export default class VariableSelector extends React.Component {
   // functions.
   constrainedOptions = memoize(
     (meta, constraint) => flow(
-      tap(meta => console.log('constrainedOptions: meta:', objectId(meta))),
-      tap(meta => console.log('constrainedOptions: constraint:', objectId(constraint))),
+      tap(meta => console.log('VS.constrainedOptions: meta:', objectId(meta))),
+      tap(meta => console.log('VS.constrainedOptions: constraint:', objectId(constraint))),
       this.allOptions,
       map(({ contexts, value, label }) => (
         {
@@ -178,7 +171,7 @@ export default class VariableSelector extends React.Component {
             context => isMatch(constraint, context)
           )(contexts) }
       )),
-      // tap(m => console.log('constrainedOptions', m))
+      // tap(m => console.log('VS.constrainedOptions', m))
     )(meta)
   );
 
@@ -211,7 +204,7 @@ export default class VariableSelector extends React.Component {
   handleChange = option => this.props.onChange(option.value);
 
   render() {
-    console.log('render')
+    console.log('VS.render')
     return (
       <Select
         isSearchable

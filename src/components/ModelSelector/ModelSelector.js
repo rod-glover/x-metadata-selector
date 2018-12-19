@@ -21,6 +21,8 @@ import {
   tap,
 } from 'lodash/fp'
 
+import objectId from '../../debug-utils/object-id';
+
 import './ModelSelector.css';
 
 
@@ -33,6 +35,7 @@ export default class ModelSelector extends React.Component {
 
   options = memoize(
     meta => flow(
+      tap(meta => console.log('MS.options: meta:', objectId(meta))),
       map(m => ({
         value: m.model_id,
         label: m.model_id,
@@ -49,6 +52,7 @@ export default class ModelSelector extends React.Component {
   handleChange = option => this.props.onChange(option.value);
 
   render() {
+    console.log('MS.render')
     return (
       <Select
         isSearchable
