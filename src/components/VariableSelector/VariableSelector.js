@@ -49,7 +49,7 @@ export default class VariableSelector extends React.Component {
   // See https://reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html#what-about-memoization
 
   allOptions = memoize(
-    (meta) => flow(
+    meta => flow(
       map(pick(VariableSelector.variable_props)),
       uniqBy(JSON.stringify),
       map(value => (
@@ -62,15 +62,11 @@ export default class VariableSelector extends React.Component {
     )(meta)
   );
 
-  // Doesn't need to be memoized
-  mymOptions = memoize(
-    (meta) => filter(o => o.value.multi_year_mean)(this.allOptions(meta))
-  );
+  mymOptions =
+    meta => filter(o => o.value.multi_year_mean)(this.allOptions(meta));
 
-  // Doesn't need to be memoized
-  notMymOptions = memoize(
-    (meta) => filter(o => !o.value.multi_year_mean)(this.allOptions(meta))
-  );
+  notMymOptions =
+    meta => filter(o => !o.value.multi_year_mean)(this.allOptions(meta));
 
   options = memoize(
     (meta) => [
@@ -84,6 +80,8 @@ export default class VariableSelector extends React.Component {
       },
     ]
   );
+
+  // Value-exchange functions
 
   optionFor = value => find({ value })(this.allOptions(this.props.meta));
 
