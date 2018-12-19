@@ -30,7 +30,7 @@ class App extends Component {
         </Row>
         <Row>
           <Col lg={3}>
-            {stringify(this.state.variable && this.state.variable.value)}
+            {stringify(this.state.variable)}
           </Col>
         </Row>
       </Grid>

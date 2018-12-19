@@ -9,6 +9,7 @@ import flow from 'lodash/fp/flow';
 import identity from 'lodash/fp/identity';
 import map from 'lodash/fp/map';
 import filter from 'lodash/fp/filter';
+import find from 'lodash/fp/find';
 import pick from 'lodash/fp/pick';
 import sortBy from 'lodash/fp/sortBy';
 import uniqBy from 'lodash/fp/uniqBy';
@@ -84,14 +85,18 @@ export default class VariableSelector extends React.Component {
     ]
   );
 
+  optionFor = value => find({ value })(this.allOptions(this.props.meta));
+
+  handleChange = option => this.props.onChange(option.value);
+
   render() {
     return (
       <Select
         isSearchable
         options={this.options(this.props.meta)}
         components={{ Option: MyOption }}
-        value={this.props.value}
-        onChange={this.props.onChange}
+        value={this.optionFor(this.props.value)}
+        onChange={this.handleChange}
       />
     );
   }
