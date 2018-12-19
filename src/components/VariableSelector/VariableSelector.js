@@ -32,6 +32,8 @@ const MyOption = props => {
 export default class VariableSelector extends React.Component {
   static propTypes = {
     meta: PropTypes.array,
+    value: PropTypes.any,
+    onChange: PropTypes.func,
   };
 
   static variable_props =
@@ -71,6 +73,8 @@ export default class VariableSelector extends React.Component {
         isSearchable
         options={options}
         components={{ Option: MyOption }}
+        value={this.props.value}
+        onChange={this.props.onChange}
       />
     );
   }
