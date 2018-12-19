@@ -23,6 +23,7 @@ class App extends Component {
           <Col lg={3}>
             <VariableSelector
               meta={meta}
+              constraint={{ model_id: "MRI-CGCM3" }}
               variable={this.state.variable}
               onChange={this.handleChangeVariable}
             />

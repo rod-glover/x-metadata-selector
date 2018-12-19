@@ -6,6 +6,7 @@ import { Glyphicon } from 'react-bootstrap';
 import memoize from "memoize-one";
 
 import flow from 'lodash/fp/flow';
+import constant from 'lodash/fp/constant';
 import identity from 'lodash/fp/identity';
 import map from 'lodash/fp/map';
 import filter from 'lodash/fp/filter';
@@ -35,11 +36,18 @@ const MyOption = props => {
 export default class VariableSelector extends React.Component {
   static propTypes = {
     meta: PropTypes.array,
+    constraint: PropTypes.object,
     value: PropTypes.any,
     onChange: PropTypes.func,
   };
 
-  static variable_props =
+  static defaultProps = {
+    constraint: constant(true),
+  };
+
+  static contextProps =
+    'model_id, experiment'.split(' ');
+  static variableProps =
     'variable_id variable_name multi_year_mean'.split(' ');
 
   optionValueToLabel = ({ variable_id, variable_name }) =>
@@ -50,13 +58,13 @@ export default class VariableSelector extends React.Component {
 
   allOptions = memoize(
     meta => flow(
-      map(pick(VariableSelector.variable_props)),
-      uniqBy(JSON.stringify),
-      map(value => (
-        {
-          value,
-          label: this.optionValueToLabel(value),
-        }
+      map(m => ({
+        context: pick(VariableSelector.contextProps)(m),
+        value: pick(VariableSelector.variableProps)(m),
+      })),
+      uniqBy(({ value }) => JSON.stringify(value)),
+      map(({ context, value }) => (
+        { context, value, label: this.optionValueToLabel(value) }
       )),
       sortBy('value.variable_id'),
     )(meta)
