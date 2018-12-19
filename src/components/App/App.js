@@ -12,6 +12,7 @@ function stringify(obj) {
 class App extends Component {
   state = {
     variable: null,
+    constraint: { model_id: 'MRI-CGCM3' },
   };
 
   handleChangeVariable = variable => this.setState({ variable });
@@ -23,7 +24,7 @@ class App extends Component {
           <Col lg={3}>
             <VariableSelector
               meta={meta}
-              constraint={{ model_id: "MRI-CGCM3" }}
+              constraint={this.state.constraint}
               variable={this.state.variable}
               onChange={this.handleChangeVariable}
             />
