@@ -1,0 +1,6 @@
+{
+  "name": "MetadataSelector",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./MetadataSelector.js"
+}
