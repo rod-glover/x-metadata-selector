@@ -25,7 +25,7 @@ class App extends Component {
             <VariableSelector
               meta={meta}
               constraint={this.state.constraint}
-              variable={this.state.variable}
+              value={this.state.variable}
               onChange={this.handleChangeVariable}
             />
           </Col>
