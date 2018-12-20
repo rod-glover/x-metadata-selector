@@ -11,8 +11,6 @@ import memoize from 'memoize-one';
 
 import meta from '../../assets/meta'
 import './App.css';
-import OldVariableSelector from '../ZzzVariableSelector';
-import OldModelSelector from '../ZzzModelSelector';
 import VariableSelector from '../VariableSelector';
 import ModelSelector from '../ModelSelector';
 
@@ -57,28 +55,7 @@ class App extends Component {
       <Grid fluid>
         <Row>
           <Col lg={3}>
-            Model -> Variable: Original Flavour
-          </Col>
-          <Col lg={3}>
-            <OldModelSelector
-              meta={meta}
-              value={this.state.MV.model}
-              onChange={this.MVhandleChangeModel}
-            />
-          </Col>
-          <Col lg={3}>
-            <OldVariableSelector
-              meta={meta}
-              constraint={this.MVvariableSelectorConstraint(this.state.MV)}
-              value={this.state.MV.variable}
-              onChange={this.MVhandleChangeVariable}
-            />
-          </Col>
-        </Row>
-
-        <Row>
-          <Col lg={3}>
-            Model -> Variable: Spicy
+            Model -> Variable
           </Col>
           <Col lg={3}>
             <ModelSelector
