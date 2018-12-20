@@ -24,56 +24,75 @@ function stringify(obj) {
 
 class App extends Component {
   state = {
-    model: 'MRI-CGCM3',
-    variable: null,
+    MV: {
+      model: 'MRI-CGCM3',
+      variable: null,
+    },
+    VM: {
+      model: null,
+      variable: {
+        variable_id: "pr",
+        variable_name: "Precipitation",
+        multi_year_mean: true,
+      },
+    }
   };
 
-  variableSelectorConstraint = memoize(model_id => ({ model_id }));
+  MVvariableSelectorConstraint = memoize(({ model: model_id }) => ({ model_id }));
 
-  handleChangeVariable = variable => this.setState({ variable });
-  handleChangeModel = model => this.setState({ model });
+  MVhandleChangeVariable = variable =>
+    this.setState(prevState => ({ MV: { ...prevState.MV, variable } }));
+  MVhandleChangeModel = model =>
+    this.setState(prevState => ({ MV: { ...prevState.MV, model } }));
+
+  VMvariableSelectorConstraint = memoize(({ variable }) => variable);
+
+  VMhandleChangeVariable = variable =>
+    this.setState(prevState => ({ VM: { ...prevState.VM, variable } }));
+  VMhandleChangeModel = model =>
+    this.setState(prevState => ({ VM: { ...prevState.VM, model } }));
 
   render() {
     return (
       <Grid fluid>
         <Row>
           <Col lg={3}>
-            Original Flavour
+            Model -> Variable: Original Flavour
           </Col>
           <Col lg={3}>
             <OldModelSelector
               meta={meta}
-              value={this.state.model}
-              onChange={this.handleChangeModel}
+              value={this.state.MV.model}
+              onChange={this.MVhandleChangeModel}
             />
           </Col>
           <Col lg={3}>
             <OldVariableSelector
               meta={meta}
-              constraint={this.variableSelectorConstraint(this.state.model)}
-              value={this.state.variable}
-              onChange={this.handleChangeVariable}
+              constraint={this.MVvariableSelectorConstraint(this.state.MV)}
+              value={this.state.MV.variable}
+              onChange={this.MVhandleChangeVariable}
             />
           </Col>
         </Row>
 
         <Row>
           <Col lg={3}>
-            Spicy
+            Model -> Variable: Spicy
           </Col>
           <Col lg={3}>
             <ModelSelector
               meta={meta}
-              value={this.state.model}
-              onChange={this.handleChangeModel}
+              value={this.state.MV.model}
+              onChange={this.MVhandleChangeModel}
             />
           </Col>
           <Col lg={3}>
             <VariableSelector
               meta={meta}
-              constraint={this.variableSelectorConstraint(this.state.model)}
-              value={this.state.variable}
-              onChange={this.handleChangeVariable}
+              constraint={this.MVvariableSelectorConstraint(this.state.MV)}
+              value={this.state.MV.variable}
+              onChange={this.MVhandleChangeVariable}
             />
           </Col>
         </Row>
@@ -82,12 +101,45 @@ class App extends Component {
           <Col lg={3}>
           </Col>
           <Col lg={3}>
-            {stringify(this.state.model)}
+            {stringify(this.state.MV.model)}
           </Col>
           <Col lg={3}>
-            {stringify(this.state.variable)}
+            {stringify(this.state.MV.variable)}
           </Col>
         </Row>
+
+        <Row>
+          <Col lg={3}>
+            Variable -> Model
+          </Col>
+          <Col lg={3}>
+            <VariableSelector
+              meta={meta}
+              value={this.state.VM.variable}
+              onChange={this.VMhandleChangeVariable}
+            />
+          </Col>
+          <Col lg={3}>
+            <ModelSelector
+              meta={meta}
+              constraint={this.VMvariableSelectorConstraint(this.state.VM)}
+              value={this.state.VM.model}
+              onChange={this.VMhandleChangeModel}
+            />
+          </Col>
+        </Row>
+
+        <Row>
+          <Col lg={3}>
+          </Col>
+          <Col lg={3}>
+            {stringify(this.state.VM.variable)}
+          </Col>
+          <Col lg={3}>
+            {stringify(this.state.VM.model)}
+          </Col>
+        </Row>
+
       </Grid>
     );
   }
