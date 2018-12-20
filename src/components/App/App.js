@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Grid, Row, Col } from 'react-bootstrap';
+import { Glyphicon } from 'react-bootstrap';
 import memoize from 'memoize-one';
 
 import meta from '../../assets/meta'
@@ -14,6 +15,10 @@ import {
   pick,
   some,
 } from 'lodash/fp';
+
+import { components } from 'react-select';
+
+const { Option } = components;
 
 function stringify(obj) {
   return <pre>{JSON.stringify(obj, null, 2)}</pre>;
@@ -70,6 +75,15 @@ class SpicyVariableSelector extends Component {
     ];
   };
 
+  static VariableOption = props => {
+    return (
+      <Option {...props}>
+        <Glyphicon glyph={props.value.multi_year_mean ? 'repeat' : 'star'}/>
+        {' '}
+        {props.label}
+      </Option>
+    )};
+
   render() {
     return (
       <MetadataSelector
@@ -79,6 +93,7 @@ class SpicyVariableSelector extends Component {
         getOptionLabel={SpicyVariableSelector.getOptionLabel}
         getOptionIsDisabled={this.getOptionIsDisabled}
         groupOptions={SpicyVariableSelector.groupOptions}
+        components={{ Option: SpicyVariableSelector.VariableOption }}
       />
     );
   }
