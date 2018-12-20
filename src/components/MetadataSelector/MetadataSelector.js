@@ -34,12 +34,6 @@ export default class MetadataSelector extends React.Component {
     // MetadataSelector collects all metadata items with the same
     // value into a single option.
 
-    getOptionContext: PropTypes.func,
-    // Maps a metadata item to a context item for an option.
-    // Contexts for the same option are collected in the `contexts`
-    // property of an option, where "same option" is defined by the same
-    // value of `option.value`.
-
     getOptionLabel: PropTypes.func,
     // Maps an option to the label (a string) for that option.
 
@@ -60,7 +54,6 @@ export default class MetadataSelector extends React.Component {
   };
 
   static defaultProps = {
-    getOptionContext: identity,
     getOptionLabel: option => option.value.toString(),
     getOptionIsDisabled: constant(false),
     groupOptions: identity,
@@ -115,12 +108,9 @@ export default class MetadataSelector extends React.Component {
   //      and props.onChange.
   //    contexts: [ <object> ]
   //      The contexts in which the option occurs. A context is a
-  //      subset of metadata time contents, specified by `contextProps`.
+  //      metadata item from which an equal option value is generated.
   //      (Contexts are used to determine enabled/disabled status,
   //      but this function is not concerned with that status.)
-  //      We could just accumulate a list of metadata items (without
-  //      subsetting them), but this paves the way for a more general
-  //      treatment which will likely be useful later.
   //    label: <string>
   //      The label for the option that appears in the selector UI.
   //  }
@@ -136,11 +126,11 @@ export default class MetadataSelector extends React.Component {
   // Debug logging in `tap` calls appear to show that the inner function
   // is called more than once per consecutive unique argument. WTF?
   allOptions = memoize(
-    (getOptionContext, getOptionValue, getOptionLabel, meta) =>
+    (getOptionValue, getOptionLabel, meta) =>
       flow(
         tap(meta => console.log('MetadataSelector.allOptions: meta:', objectId(meta))),
         map(m => ({
-          context: getOptionContext(m),
+          context: m,
           value: getOptionValue(m),
         })),
         this.groupByGeneral(({ value }) => value),
@@ -167,7 +157,6 @@ export default class MetadataSelector extends React.Component {
       // tap(m => console.log('MetadataSelector.constrainedOptions', m))
     )(
       this.allOptions(
-        this.props.getOptionContext,
         this.props.getOptionValue,
         this.props.getOptionLabel,
         meta

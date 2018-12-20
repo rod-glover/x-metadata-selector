@@ -22,11 +22,6 @@ export default class VariableSelector extends Component {
   static getOptionValue = metadatum =>
     pick(VariableSelector.valueProps, metadatum);
 
-  static contextProps =
-    'model_id experiment'.split(' ');
-  static getOptionContext = metadatum =>
-    pick(VariableSelector.contextProps, metadatum);
-
   static getOptionLabel = ({ value: { variable_id, variable_name }}) =>
     `${variable_id} - ${variable_name}`;
 
@@ -62,7 +57,6 @@ export default class VariableSelector extends Component {
       <ConstrainedMetadataSelector
         {...this.props}
         getOptionValue={VariableSelector.getOptionValue}
-        getOptionContext={VariableSelector.getOptionContext}
         getOptionLabel={VariableSelector.getOptionLabel}
         groupOptions={VariableSelector.groupOptions}
         components={{ Option: VariableSelector.Option }}
