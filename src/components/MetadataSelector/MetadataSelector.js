@@ -20,6 +20,7 @@ import {
   toPairs,
   some,
   tap,
+  isEqual,
 } from 'lodash/fp';
 
 import objectId from '../../debug-utils/object-id';
@@ -183,7 +184,10 @@ export default class MetadataSelector extends React.Component {
 
   // Value-exchange functions
 
-  optionFor = value => find({ value })(this.constrainedOptions(this.props.meta));
+  optionFor = value => find(
+    option => isEqual(option.value, value),
+    this.constrainedOptions(this.props.meta)
+  );
 
   handleChange = option => this.props.onChange(option.value);
 
