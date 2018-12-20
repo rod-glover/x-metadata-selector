@@ -152,7 +152,7 @@ export default class MetadataSelector extends React.Component {
             value: group.by,
         })),
         map(option => assign(option, { label: getOptionLabel(option) })),
-        sortBy('value.label'),
+        sortBy('label'),
         // tap(m => console.log('MetadataSelector.allOptions', m)),
       )(meta)
   );
