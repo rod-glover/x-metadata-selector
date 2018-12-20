@@ -1,3 +1,10 @@
+// TODO: Create wrapper component ConstrainedMetadataSelector: encapsulates
+//  getOptionIsDisabled matching constraint to contexts; use it in
+//  SpicyXXX
+// TODO: Replace ModelSelector with SpicyModelSelector; allow constraints
+// TODO: Replace NavigationSelector with SpicyModelSelector
+// TODO: Create EmissionsScenarioSelector; allow constraints
+
 import React, { Component } from 'react';
 import { Grid, Row, Col } from 'react-bootstrap';
 import { Glyphicon } from 'react-bootstrap';
