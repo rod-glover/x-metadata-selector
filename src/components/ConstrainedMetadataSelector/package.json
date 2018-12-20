@@ -1,0 +1,6 @@
+{
+  "name": "ConstrainedMetadataSelector",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./ConstrainedMetadataSelector.js"
+}
