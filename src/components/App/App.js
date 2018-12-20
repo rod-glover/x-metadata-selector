@@ -8,6 +8,12 @@ import VariableSelector from '../VariableSelector';
 import ModelSelector from '../ModelSelector';
 import MetadataSelector from '../MetadataSelector';
 import PropTypes from 'prop-types';
+import {
+  filter,
+  isMatch,
+  pick,
+  some,
+} from 'lodash/fp';
 
 function stringify(obj) {
   return <pre>{JSON.stringify(obj, null, 2)}</pre>;
@@ -29,14 +35,58 @@ class SpicyModelSelector extends Component {
 
 
 class SpicyVariableSelector extends Component {
+  static propTypes = {
+    constraint: PropTypes.object,
+  };
+
+  static valueProps =
+    'variable_id variable_name multi_year_mean'.split(' ');
+  static getOptionValue = metadatum =>
+    pick(SpicyVariableSelector.valueProps, metadatum);
+
+  static contextProps =
+    'model_id experiment'.split(' ');
+  static getOptionContext = metadatum =>
+    pick(SpicyVariableSelector.contextProps, metadatum);
+
+  static getOptionLabel = ({ value: { variable_id, variable_name }}) =>
+    `${variable_id} - ${variable_name}`;
+
+  // Can't be static: needs to access props.
+  getOptionIsDisabled = option => !some(
+    context => isMatch(this.props.constraint, context)
+  )(option.contexts);
+
+  static groupOptions = options => {
+    return [
+      {
+        label: 'Multi-Year Mean Datasets',
+        options: filter(o => o.value.multi_year_mean)(options),
+      },
+      {
+        label: 'Time Series Datasets',
+        options: filter(o => !o.value.multi_year_mean)(options),
+      },
+    ];
+  };
+
   render() {
-    return <div>SpicyVariableSelector</div>
+    return (
+      <MetadataSelector
+        {...this.props}
+        getOptionValue={SpicyVariableSelector.getOptionValue}
+        getOptionContext={SpicyVariableSelector.getOptionContext}
+        getOptionLabel={SpicyVariableSelector.getOptionLabel}
+        getOptionIsDisabled={this.getOptionIsDisabled}
+        groupOptions={SpicyVariableSelector.groupOptions}
+      />
+    );
   }
 }
 
 
 
-  class App extends Component {
+class App extends Component {
   state = {
     model: 'MRI-CGCM3',
     variable: null,
@@ -70,16 +120,6 @@ class SpicyVariableSelector extends Component {
             />
           </Col>
         </Row>
-        <Row>
-          <Col lg={3}>
-          </Col>
-          <Col lg={3}>
-            {stringify(this.state.model)}
-          </Col>
-          <Col lg={3}>
-            {stringify(this.state.variable)}
-          </Col>
-        </Row>
 
         <Row>
           <Col lg={3}>
@@ -101,6 +141,7 @@ class SpicyVariableSelector extends Component {
             />
           </Col>
         </Row>
+
         <Row>
           <Col lg={3}>
           </Col>
