@@ -108,7 +108,7 @@ class App extends Component {
   anySelector = sel => {
     switch (sel) {
       case 'model': return (
-        <Col lg={3}>
+        <Col lg={4}>
           <ModelSelector
             meta={meta}
             constraint={this.anySelectorConstraint('model', this.state.selectorOrder, this.state.any)}
@@ -118,7 +118,7 @@ class App extends Component {
         </Col>
       );
       case 'emissions': return (
-        <Col lg={3}>
+        <Col lg={4}>
           <EmissionsScenarioSelector
             meta={meta}
             constraint={this.anySelectorConstraint('emissions', this.state.selectorOrder, this.state.any)}
@@ -128,7 +128,7 @@ class App extends Component {
         </Col>
       );
       case 'variable': return (
-        <Col lg={3}>
+        <Col lg={4}>
           <VariableSelector
             meta={meta}
             constraint={this.anySelectorConstraint('variable', this.state.selectorOrder, this.state.any)}
@@ -157,97 +157,9 @@ class App extends Component {
     return (
       <Grid fluid>
         <Row>
-          <Col lg={3}>
-            Model -> Emissions -> Variable
-          </Col>
-          <Col lg={3}>
-            <ModelSelector
-              meta={meta}
-              value={this.state.MEV.model}
-              onChange={this.MEVhandleChangeModel}
-            />
-          </Col>
-          <Col lg={3}>
-            <EmissionsScenarioSelector
-              meta={meta}
-              constraint={this.MEVemissionsSelectorConstraint(this.state.MEV)}
-              value={this.state.MEV.emissions}
-              onChange={this.MEVhandleChangeEmissions}
-            />
-          </Col>
-          <Col lg={3}>
-            <VariableSelector
-              meta={meta}
-              constraint={this.MEVvariableSelectorConstraint(this.state.MEV)}
-              value={this.state.MEV.variable}
-              onChange={this.MEVhandleChangeVariable}
-            />
-          </Col>
-        </Row>
-
-        <Row>
-          <Col lg={3}>
-          </Col>
-          <Col lg={3}>
-            {stringify(this.state.MEV.model)}
-          </Col>
-          <Col lg={3}>
-            {stringify(this.state.MEV.emissions)}
-          </Col>
-          <Col lg={3}>
-            {stringify(this.state.MEV.variable)}
-          </Col>
-        </Row>
-
-        <Row>
-          <Col lg={3}>
-            Variable -> Emissions -> Model
-          </Col>
-          <Col lg={3}>
-            <VariableSelector
-              meta={meta}
-              value={this.state.VEM.variable}
-              onChange={this.VEMhandleChangeVariable}
-            />
-          </Col>
-          <Col lg={3}>
-            <EmissionsScenarioSelector
-              meta={meta}
-              constraint={this.VEMemissionsSelectorConstraint(this.state.VEM)}
-              value={this.state.VEM.emissions}
-              onChange={this.VEMhandleChangeEmissions}
-            />
-          </Col>
-          <Col lg={3}>
-            <ModelSelector
-              meta={meta}
-              constraint={this.VEMmodelSelectorConstraint(this.state.VEM)}
-              value={this.state.VEM.model}
-              onChange={this.VEMhandleChangeModel}
-            />
-          </Col>
-        </Row>
-
-        <Row>
-          <Col lg={3}>
-          </Col>
-          <Col lg={3}>
-            {stringify(this.state.VEM.variable)}
-          </Col>
-          <Col lg={3}>
-            {stringify(this.state.VEM.emissions)}
-          </Col>
-          <Col lg={3}>
-            {stringify(this.state.VEM.model)}
-          </Col>
-        </Row>
-
-        <Row>
-          <Col lg={3}>
-          </Col>
           {
             this.state.selectorOrder.map((sel, index) => (
-            <Col lg={3}>
+            <Col lg={4}>
               {
                 index > 0 &&
                 <Button
@@ -269,21 +181,16 @@ class App extends Component {
               }
             </Col>
             ))
-
           }
         </Row>
         <Row>
-          <Col lg={3}>
-          </Col>
           {map(sel => this.anySelector(sel))(this.state.selectorOrder)}
         </Row>
 
         <Row>
-          <Col lg={3}>
-          </Col>
           {
             map(sel => (
-              <Col lg={3}>
+              <Col lg={4}>
                 {stringify(this.state.any[sel])}
               </Col>
             ))(this.state.selectorOrder)
