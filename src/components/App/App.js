@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Grid, Row, Col, Button, Glyphicon } from 'react-bootstrap';
 import memoize from 'memoize-one';
 import { flow, takeWhile, map, reduce, assign, slice, concat, tap } from 'lodash/fp';
+import { objUnion } from '../../utils/fp';
 import _ from 'lodash';
 
 import meta from '../../assets/meta'
@@ -84,13 +85,11 @@ class App extends Component {
       any: { ...prevState.any, variable: value }
     }));
 
-  extend = reduce((result, value) => assign(result, value), {});
-
   anySelectorConstraint =
     (thisSelector, selectorOrder, state) => flow(
       takeWhile(selector => selector !== thisSelector),
       map(selector => state[selector]),
-      this.extend,
+      objUnion,
     )(selectorOrder)
   ;
 
