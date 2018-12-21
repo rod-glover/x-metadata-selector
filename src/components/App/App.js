@@ -1,10 +1,3 @@
-// TODO: Create wrapper component ConstrainedMetadataSelector: encapsulates
-//  getOptionIsDisabled matching constraint to contexts; use it in
-//  SpicyXXX
-// TODO: Replace ModelSelector with SpicyModelSelector; allow constraints
-// TODO: Replace NavigationSelector with SpicyModelSelector
-// TODO: Create EmissionsScenarioSelector; allow constraints
-
 import React, { Component } from 'react';
 import { Grid, Row, Col, Button, Glyphicon } from 'react-bootstrap';
 import memoize from 'memoize-one';
@@ -95,13 +88,9 @@ class App extends Component {
 
   anySelectorConstraint =
     (thisSelector, selectorOrder, state) => flow(
-      tap(selectorOrder => console.log('anySelectorConstraint: selectorOrder', selectorOrder, thisSelector)),
       takeWhile(selector => selector !== thisSelector),
-      tap(selectors => console.log('anySelectorConstraint: selectors', selectors)),
       map(selector => state[selector]),
-      tap(states => console.log('anySelectorConstraint: states', states)),
       this.extend,
-      tap(constraint => console.log('anySelectorConstraint: constraint', constraint)),
     )(selectorOrder)
   ;
 
