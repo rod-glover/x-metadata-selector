@@ -94,10 +94,14 @@ class App extends Component {
     )(selectorOrder)
   ;
 
+  static colProps = {
+    lg: 4, md: 4, sm: 4,
+  }
+
   anySelector = sel => {
     switch (sel) {
       case 'model': return (
-        <Col lg={4}>
+        <Col {...App.colProps}>
           <ModelSelector
             meta={meta}
             constraint={this.anySelectorConstraint('model', this.state.selectorOrder, this.state.any)}
@@ -107,7 +111,7 @@ class App extends Component {
         </Col>
       );
       case 'emissions': return (
-        <Col lg={4}>
+        <Col {...App.colProps}>
           <EmissionsScenarioSelector
             meta={meta}
             constraint={this.anySelectorConstraint('emissions', this.state.selectorOrder, this.state.any)}
@@ -117,7 +121,7 @@ class App extends Component {
         </Col>
       );
       case 'variable': return (
-        <Col lg={4}>
+        <Col {...App.colProps}>
           <VariableSelector
             meta={meta}
             constraint={this.anySelectorConstraint('variable', this.state.selectorOrder, this.state.any)}
@@ -148,7 +152,7 @@ class App extends Component {
         <Row>
           {
             this.state.selectorOrder.map((sel, index) => (
-            <Col lg={4}>
+            <Col {...App.colProps} className='text-center'>
               {
                 index > 0 &&
                 <Button
@@ -179,7 +183,7 @@ class App extends Component {
         <Row>
           {
             map(sel => (
-              <Col lg={4}>
+              <Col {...App.colProps}>
                 {stringify(this.state.any[sel])}
               </Col>
             ))(this.state.selectorOrder)
