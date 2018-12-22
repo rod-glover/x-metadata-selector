@@ -1,4 +1,6 @@
-import { reduce, assign, map, toPairs, flow, curry, groupBy } from 'lodash/fp';
+import {
+  reduce, assign, map, toPairs, flow, curry, groupBy,
+} from 'lodash/fp';
 
 
 // Group a list by accumulating all items that match on `by` into a single
@@ -21,6 +23,8 @@ export const groupByGeneral = curry(
     map(pair => ({ by: JSON.parse(pair[0]), items: pair[1] }))
   )(list)
 );
+
+export const mapWithKey = map.convert({ cap: false });
 
 
 // Return the "union" of a list of objects. "Union" here means assigning all
