@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
 import { Grid, Row, Col, Button, Glyphicon } from 'react-bootstrap';
 import memoize from 'memoize-one';
-import { flow, takeWhile, slice, map, reduce, filter, tap } from 'lodash/fp';
+import {
+  flow, takeWhile, slice, map, reduce, filter, tap,
+  sortBy
+} from 'lodash/fp';
 import { objUnion } from '../../utils/fp';
 import _ from 'lodash';
 
@@ -199,13 +202,17 @@ class App extends Component {
 
         <Row>
           <Col>
+            <h1>Metadata filtered by Model, Emissions, Variable</h1>
             <ul>
               {
-                map(m => (
-                  <li>
-                    {`${m.ensemble_member} ${m.start_date}-${m.end_date} ${m.multi_year_mean ? 'MYM' : 'TS'} ${m.timescale}`}
-                  </li>
-                ))(mevFilteredMetadata)
+                flow(
+                  sortBy(['ensemble_member', 'start_date', 'timescale']),
+                  map(m => (
+                    <li>
+                      {`${m.ensemble_member} ${m.start_date}-${m.end_date} ${m.multi_year_mean ? 'MYM' : 'TS'} ${m.timescale}`}
+                    </li>
+                  ))
+                )(mevFilteredMetadata)
               }
             </ul>
           </Col>
