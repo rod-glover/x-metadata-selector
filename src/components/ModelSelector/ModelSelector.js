@@ -14,6 +14,7 @@ export default class ModelSelector extends Component {
   static getOptionValue = metadatum => metadatum.model_id;
 
   render() {
+    console.log('ModelSelector.render')
     return (
       <ConstrainedMetadataSelector
         {...this.props}

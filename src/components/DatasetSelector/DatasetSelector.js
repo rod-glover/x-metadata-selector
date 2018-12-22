@@ -21,6 +21,8 @@ export default class DatasetSelector extends Component {
     `${ensemble_member} ${start_date}-${end_date}`;
   
   render() {
+    return null;
+    console.log('DatasetSelector.render')
     return (
       <ConstrainedMetadataSelector
         {...this.props}
