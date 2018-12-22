@@ -5,7 +5,6 @@ import Select from 'react-select';
 import memoize from 'memoize-one';
 
 import {
-  curry,
   assign,
   flow,
   constant,
@@ -13,11 +12,10 @@ import {
   map,
   find,
   sortBy,
-  groupBy,
-  toPairs,
   tap,
   isEqual,
 } from 'lodash/fp';
+import { groupByGeneral } from '../../utils/fp';
 
 import objectId from '../../debug-utils/object-id';
 
@@ -76,29 +74,6 @@ export default class MetadataSelector extends React.Component {
   // Memoize computation of options list
   // See https://reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html#what-about-memoization
 
-  // TODO: Extract to utility module.
-  /**
-   * Groups a list by accumulating all items that match on `by` into a single
-   * list item containing the `by` value. The result is a list of objects
-   * of the following shape:
-   *  {
-   *    by: <any>,
-   *    items: [ <any> ]
-   *  }
-   *
-   *  Implementation note: The use of JSON encoding to manage the group keys
-   *  (and, not coincidentally, to pass the bulk of the work off to `groupBy`)
-   *  is unsound and potentially inefficient, but very, very convenient. Shame.
-   *  Better to use a WeakMap to accumulate the groups.
-   */
-  groupByGeneral = curry(
-    (by, list) => flow(
-      groupBy(item => JSON.stringify(by(item))),
-      toPairs,
-      map(pair => ({ by: JSON.parse(pair[0]), items: pair[1] }))
-    )(list)
-  );
-
   // Form the list of all options (without isDisabled property) from the
   // list of metadata. An option item has the following form:
   //
@@ -133,7 +108,7 @@ export default class MetadataSelector extends React.Component {
           context: m,
           value: getOptionValue(m),
         })),
-        this.groupByGeneral(({ value }) => value),
+        groupByGeneral(({ value }) => value),
         map(group => ({
             contexts: map(item => item.context)(group.items),
             value: group.by,
