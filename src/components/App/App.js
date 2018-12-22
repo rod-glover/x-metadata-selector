@@ -13,6 +13,7 @@ import './App.css';
 import VariableSelector from '../VariableSelector';
 import ModelSelector from '../ModelSelector';
 import EmissionsScenarioSelector from '../EmissionsScenarioSelector';
+import DatasetSelector from '../DatasetSelector';
 
 
 function stringify(obj) {
@@ -50,6 +51,7 @@ class App extends Component {
       },
     },
     selectorOrder: 'model emissions variable'.split(' '),
+    dataset: {},
   };
 
   handleChangeSelection = (collection, item, value) =>
@@ -96,9 +98,11 @@ class App extends Component {
     )(selectorOrder)
   ;
 
+  handleChangeDataset = dataset => this.setState({ dataset });
+
   static colProps = {
     lg: 4, md: 4, sm: 4,
-  }
+  };
 
   anySelector = sel => {
     switch (sel) {
@@ -150,6 +154,7 @@ class App extends Component {
   render() {
     console.log('App.render')
     const mevFilteredMetadata = filter(objUnion(this.state.any))(meta);
+    const mevdFilteredMetadata = filter(this.state.dataset)(mevFilteredMetadata);
 
     return (
       <Grid fluid>
@@ -218,6 +223,29 @@ class App extends Component {
           </Col>
         </Row>
 
+        <Row>
+          <Col {...App.colProps}>
+            <DatasetSelector
+              meta={mevFilteredMetadata}
+              value={this.state.dataset}
+              onChange={this.handleChangeDataset}
+            />
+          </Col>
+          <Col {...App.colProps}>
+            <ul>
+              {
+                flow(
+                  sortBy(['ensemble_member', 'start_date', 'timescale']),
+                  map(m => (
+                    <li>
+                      {`${m.ensemble_member} ${m.start_date}-${m.end_date} ${m.multi_year_mean ? 'MYM' : 'TS'} ${m.timescale}`}
+                    </li>
+                  ))
+                )(mevdFilteredMetadata)
+              }
+            </ul>
+          </Col>
+        </Row>
       </Grid>
     );
   }
