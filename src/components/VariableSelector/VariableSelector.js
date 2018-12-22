@@ -53,7 +53,7 @@ export default class VariableSelector extends Component {
     )};
 
   render() {
-    return null;
+    // return 'VariableSelector dummy';
     console.log('VariableSelector.render')
     return (
       <ConstrainedMetadataSelector
