@@ -151,31 +151,37 @@ class App extends Component {
     return (
       <Grid fluid>
         <Row>
-          {
-            this.state.selectorOrder.map((sel, index) => (
-            <Col {...App.colProps} className='text-center'>
-              {
-                index > 0 &&
-                <Button
-                  bsSize={'xsmall'}
-                  onClick={this.moveSelectorOrderDown.bind(this, index-1)}
-                >
-                  <Glyphicon glyph={'arrow-left'}/>
-                </Button>
-              }
-              {` ${sel} `}
-              {
-                index < 2 &&
-                <Button
-                  bsSize={'xsmall'}
-                  onClick={this.moveSelectorOrderDown.bind(this, index)}
-                >
-                  <Glyphicon glyph={'arrow-right'}/>
-                </Button>
-              }
-            </Col>
-            ))
-          }
+          <h1>Model, Emissions, Variable selectors</h1>
+        </Row>
+        <Row>
+          <h2>
+            {
+              this.state.selectorOrder.map((sel, index) => (
+                <Col {...App.colProps} className='text-center'>
+                  {
+                    index > 0 &&
+                    <Button
+                      bsSize={'xsmall'}
+                      onClick={this.moveSelectorOrderDown.bind(this, index-1)}
+                    >
+                      <Glyphicon glyph={'arrow-left'}/>
+                    </Button>
+                  }
+                  {` ${sel} `}
+                  {
+                    index < 2 &&
+                    <Button
+                      bsSize={'xsmall'}
+                      onClick={this.moveSelectorOrderDown.bind(this, index)}
+                    >
+                      <Glyphicon glyph={'arrow-right'}/>
+                    </Button>
+                  }
+                </Col>
+              ))
+            }
+
+          </h2>
         </Row>
         <Row>
           {map(sel => this.anySelector(sel))(this.state.selectorOrder)}
