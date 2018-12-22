@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Grid, Row, Col, Button, Glyphicon } from 'react-bootstrap';
 import memoize from 'memoize-one';
-import { flow, takeWhile, map, reduce, assign, slice, concat, tap } from 'lodash/fp';
+import { flow, takeWhile, slice, map, reduce, filter, tap } from 'lodash/fp';
 import { objUnion } from '../../utils/fp';
 import _ from 'lodash';
 
@@ -146,6 +146,8 @@ class App extends Component {
 
   render() {
     console.log('App.render')
+    const mevFilteredMetadata = filter(objUnion(this.state.any))(meta);
+
     return (
       <Grid fluid>
         <Row>
@@ -187,6 +189,20 @@ class App extends Component {
               </Col>
             ))(this.state.selectorOrder)
           }
+        </Row>
+
+        <Row>
+          <Col>
+            <ul>
+              {
+                map(m => (
+                  <li>
+                    {`${m.ensemble_member} ${m.start_date}-${m.end_date} ${m.multi_year_mean ? 'MYM' : 'TS'} ${m.timescale}`}
+                  </li>
+                ))(mevFilteredMetadata)
+              }
+            </ul>
+          </Col>
         </Row>
 
       </Grid>
