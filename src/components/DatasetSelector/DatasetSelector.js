@@ -4,7 +4,8 @@ import React, { Component } from 'react';
 import ConstrainedMetadataSelector from '../ConstrainedMetadataSelector';
 
 import './DatasetSelector.css';
-import { pick } from 'lodash/fp';
+import { flow, fromPairs, pick, map, uniq } from 'lodash/fp';
+import { mapWithKey } from '../../utils/fp';
 
 
 export default class DatasetSelector extends Component {
@@ -17,8 +18,25 @@ export default class DatasetSelector extends Component {
   static getOptionValue = metadatum =>
     pick(DatasetSelector.valueProps, metadatum);
 
-  static getOptionLabel = ({ value: { start_date, end_date, ensemble_member }}) =>
-    `${ensemble_member} ${start_date}-${end_date}`;
+  // Return an object mapping `ensemble_member` (r-i-p) values to more
+  // user-friendly 'Run <n>' values. For the current collection of datasets,
+  // there is almost always only one distinct ensemble_member, and so a
+  // very simple object mapping the one r-i-p value to 'Run 1'. But this
+  // will handle all cases.
+  static ensembleMemberTranslation = (meta) =>
+    flow(
+      map('ensemble_member'),
+      uniq,
+      mapWithKey((ensemble_member, i) => [ensemble_member, `Run ${i+1}`]),
+      fromPairs,
+    )(meta);
+
+  // Return an option label including the user-friendly 'Run <n>' names
+  // for ensemble_member values.
+  getOptionLabel = ({ value: { start_date, end_date, ensemble_member }}) => {
+    const eMT = DatasetSelector.ensembleMemberTranslation(this.props.meta);
+    return `${eMT[ensemble_member]} (${ensemble_member}), ${start_date}–${end_date}`;
+  };
   
   render() {
     console.log('DatasetSelector.render')
@@ -26,7 +44,7 @@ export default class DatasetSelector extends Component {
       <ConstrainedMetadataSelector
         {...this.props}
         getOptionValue={DatasetSelector.getOptionValue}
-        getOptionLabel={DatasetSelector.getOptionLabel}
+        getOptionLabel={this.getOptionLabel}
       />
     );
   }
