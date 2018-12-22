@@ -23,21 +23,7 @@ function stringify(obj) {
 
 class App extends Component {
   state = {
-    MEV: {
-      model: 'MRI-CGCM3',
-      emissions: null,
-      variable: null,
-    },
-    VEM: {
-      model: null,
-      emissions: null,
-      variable: {
-        variable_id: "pr",
-        variable_name: "Precipitation",
-        multi_year_mean: true,
-      },
-    },
-    any: {
+    mev: {
       model: {
         model_id: 'CanESM2',
       },
@@ -51,7 +37,11 @@ class App extends Component {
       },
     },
     selectorOrder: 'model emissions variable'.split(' '),
-    dataset: {},
+    dataset: {
+      "start_date": "1961",
+      "end_date": "1990",
+      "ensemble_member": "r1i1p1"
+    },
   };
 
   handleChangeSelection = (collection, item, value) =>
@@ -59,35 +49,17 @@ class App extends Component {
       [collection]: { ...prevState[collection], [item]: value }
     }));
 
-  MEVhandleChangeModel = this.handleChangeSelection.bind(this, 'MEV', 'model');
-  MEVhandleChangeEmissions = this.handleChangeSelection.bind(this, 'MEV', 'emissions');
-  MEVhandleChangeVariable = this.handleChangeSelection.bind(this, 'MEV', 'variable');
-
-  MEVemissionsSelectorConstraint = memoize(({ model: model_id }) => ({ model_id }));
-  MEVvariableSelectorConstraint = memoize(
-    ({ model: model_id, emissions: experiment }) => ({ model_id, experiment })
-  );
-
-  VEMhandleChangeModel = this.handleChangeSelection.bind(this, 'VEM', 'model');
-  VEMhandleChangeEmissions = this.handleChangeSelection.bind(this, 'VEM', 'emissions');
-  VEMhandleChangeVariable = this.handleChangeSelection.bind(this, 'VEM', 'variable');
-
-  VEMemissionsSelectorConstraint = memoize(({ variable }) => variable);
-  VEMmodelSelectorConstraint = memoize(
-    ({ variable, emissions: experiment }) => ({ ...variable, experiment })
-  );
-
   anyHandleChangeModel = (value) =>
     this.setState(prevState => ({
-      any: { ...prevState.any, model: { model_id: value } }
+      mev: { ...prevState.mev, model: { model_id: value } }
     }));
   anyHandleChangeEmissions = (value) =>
     this.setState(prevState => ({
-      any: { ...prevState.any, emissions: { experiment: value } }
+      mev: { ...prevState.mev, emissions: { experiment: value } }
     }));
   anyHandleChangeVariable = (value) =>
     this.setState(prevState => ({
-      any: { ...prevState.any, variable: value }
+      mev: { ...prevState.mev, variable: value }
     }));
 
   anySelectorConstraint =
@@ -101,7 +73,7 @@ class App extends Component {
   handleChangeDataset = dataset => this.setState({ dataset });
 
   static colProps = {
-    lg: 4, md: 4, sm: 4,
+    lg: 3, md: 3, sm: 3,
   };
 
   anySelector = sel => {
@@ -110,30 +82,33 @@ class App extends Component {
         <Col {...App.colProps}>
           <ModelSelector
             meta={meta}
-            constraint={this.anySelectorConstraint('model', this.state.selectorOrder, this.state.any)}
-            value={this.state.any.model.model_id}
+            constraint={this.anySelectorConstraint('model', this.state.selectorOrder, this.state.mev)}
+            value={this.state.mev.model.model_id}
             onChange={this.anyHandleChangeModel}
           />
+          {stringify(this.state.mev[sel])}
         </Col>
       );
       case 'emissions': return (
         <Col {...App.colProps}>
           <EmissionsScenarioSelector
             meta={meta}
-            constraint={this.anySelectorConstraint('emissions', this.state.selectorOrder, this.state.any)}
-            value={this.state.any.emissions.experiment}
+            constraint={this.anySelectorConstraint('emissions', this.state.selectorOrder, this.state.mev)}
+            value={this.state.mev.emissions.experiment}
             onChange={this.anyHandleChangeEmissions}
           />
+          {stringify(this.state.mev[sel])}
         </Col>
       );
       case 'variable': return (
         <Col {...App.colProps}>
           <VariableSelector
             meta={meta}
-            constraint={this.anySelectorConstraint('variable', this.state.selectorOrder, this.state.any)}
-            value={this.state.any.variable}
+            constraint={this.anySelectorConstraint('variable', this.state.selectorOrder, this.state.mev)}
+            value={this.state.mev.variable}
             onChange={this.anyHandleChangeVariable}
           />
+          {stringify(this.state.mev[sel])}
         </Col>
       );
       default: return 'Idiot';
@@ -153,61 +128,48 @@ class App extends Component {
 
   render() {
     console.log('App.render')
-    const mevFilteredMetadata = filter(objUnion(this.state.any))(meta);
+    const mevFilteredMetadata = filter(objUnion(this.state.mev))(meta);
     const mevdFilteredMetadata = filter(this.state.dataset)(mevFilteredMetadata);
 
     return (
       <Grid fluid>
         <Row>
-          <h1>Model, Emissions, Variable selectors</h1>
+          <Col lg={12} md={12} sm={12}><h1>Model, Emissions, Variable selectors</h1></Col>
         </Row>
         <Row>
-          <h2>
             {
               this.state.selectorOrder.map((sel, index) => (
                 <Col {...App.colProps} className='text-center'>
-                  {
-                    index > 0 &&
-                    <Button
-                      bsSize={'xsmall'}
-                      onClick={this.moveSelectorOrderDown.bind(this, index-1)}
-                    >
-                      <Glyphicon glyph={'arrow-left'}/>
-                    </Button>
-                  }
-                  {` ${sel} `}
-                  {
-                    index < 2 &&
-                    <Button
-                      bsSize={'xsmall'}
-                      onClick={this.moveSelectorOrderDown.bind(this, index)}
-                    >
-                      <Glyphicon glyph={'arrow-right'}/>
-                    </Button>
-                  }
+                  <h2>
+                    {
+                      index > 0 &&
+                      <Button
+                        bsSize={'xsmall'}
+                        onClick={this.moveSelectorOrderDown.bind(this, index-1)}
+                      >
+                        <Glyphicon glyph={'arrow-left'}/>
+                      </Button>
+                    }
+                    {` ${sel} `}
+                    {
+                      index < 2 &&
+                      <Button
+                        bsSize={'xsmall'}
+                        onClick={this.moveSelectorOrderDown.bind(this, index)}
+                      >
+                        <Glyphicon glyph={'arrow-right'}/>
+                      </Button>
+                    }
+                  </h2>
                 </Col>
               ))
             }
-
-          </h2>
+            <Col {...App.colProps}><h2>Filtered metadata</h2></Col>
         </Row>
+
         <Row>
           {map(sel => this.anySelector(sel))(this.state.selectorOrder)}
-        </Row>
-
-        <Row>
-          {
-            map(sel => (
-              <Col {...App.colProps}>
-                {stringify(this.state.any[sel])}
-              </Col>
-            ))(this.state.selectorOrder)
-          }
-        </Row>
-
-        <Row>
-          <Col>
-            <h1>Metadata filtered by Model, Emissions, Variable</h1>
+          <Col {...App.colProps}>
             <ul>
               {
                 flow(
@@ -224,14 +186,19 @@ class App extends Component {
         </Row>
 
         <Row>
+          <Col lg={12} md={12} sm={12}><h1>Dataset selector</h1></Col>
+        </Row>
+
+        <Row>
           <Col {...App.colProps}>
             <DatasetSelector
               meta={mevFilteredMetadata}
               value={this.state.dataset}
               onChange={this.handleChangeDataset}
             />
+            {stringify(this.state.dataset)}
           </Col>
-          <Col {...App.colProps}>
+          <Col {...App.colProps} lgOffset={6} mdOffset={6} smOffset={6}>
             <ul>
               {
                 flow(
