@@ -25,22 +25,22 @@ class App extends Component {
   state = {
     mev: {
       model: {
-        model_id: 'CanESM2',
+        // model_id: 'CanESM2',
       },
       emissions: {
-        experiment: 'historical, rcp45',
+        // experiment: 'historical, rcp45',
       },
       variable: {
-        variable_id: "pr",
-        variable_name: "Precipitation",
-        multi_year_mean: true,
+        // variable_id: "pr",
+        // variable_name: "Precipitation",
+        // multi_year_mean: true,
       },
     },
     selectorOrder: 'model emissions variable'.split(' '),
     dataset: {
-      "start_date": "1961",
-      "end_date": "1990",
-      "ensemble_member": "r1i1p1"
+      // "start_date": "1961",
+      // "end_date": "1990",
+      // "ensemble_member": "r1i1p1"
     },
   };
 

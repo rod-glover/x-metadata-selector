@@ -12,8 +12,10 @@ import {
   map,
   find,
   sortBy,
+  some,
   tap,
   isEqual,
+  isUndefined,
 } from 'lodash/fp';
 import { groupByGeneral } from '../../utils/fp';
 
@@ -49,12 +51,23 @@ export default class MetadataSelector extends React.Component {
 
     onChange: PropTypes.func,
     // Called when a different option is selected.
+
+    replaceInvalidValue: PropTypes.func,
+    // Called when value passed in is not a valid value.
+    // Called with list of all options.
+    // Must return a valid value.
+    // Beware: If you return an invalid value from this, you're screwed.
   };
 
   static defaultProps = {
     getOptionLabel: option => option.value.toString(),
     getOptionIsDisabled: constant(false),
     groupOptions: identity,
+    replaceInvalidValue: options => {
+      const firstEnabledOption = find({ isDisabled: false }, options);
+      return firstEnabledOption && firstEnabledOption.value;
+    },
+    // Replace with first enabled option.
   };
 
   constructor(props) {
@@ -142,6 +155,10 @@ export default class MetadataSelector extends React.Component {
   groupedOptions = meta =>
     this.props.groupOptions(this.constrainedOptions(meta));
 
+  isValidValue = value => some(
+    option => !option.isDisabled && isEqual(option.value, value)
+  )(this.constrainedOptions(this.props.meta));
+
   // Value-exchange functions
 
   optionFor = value => find(
@@ -154,12 +171,22 @@ export default class MetadataSelector extends React.Component {
   render() {
     console.log('MetadataSelector.render')
     // TODO: Pass through all the Select props.
+
+    let valueToUse = this.props.value;
+    if (!this.isValidValue(this.props.value)) {
+      valueToUse = this.props.replaceInvalidValue(
+        this.constrainedOptions(this.props.meta)
+      );
+      this.props.onChange(valueToUse);
+      // return null;
+    }
+
     return (
       <Select
         isSearchable
         options={this.groupedOptions(this.props.meta)}
         components={this.props.components}
-        value={this.optionFor(this.props.value)}
+        value={this.optionFor(valueToUse)}
         onChange={this.handleChange}
       />
     );
