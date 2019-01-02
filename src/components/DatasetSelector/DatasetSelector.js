@@ -45,6 +45,7 @@ export default class DatasetSelector extends Component {
         {...this.props}
         getOptionValue={DatasetSelector.getOptionValue}
         getOptionLabel={this.getOptionLabel}
+        debugValue='Dataset'
       />
     );
   }

@@ -9,6 +9,7 @@ import MetadataSelector from '../MetadataSelector';
 export default class ConstrainedMetadataSelector extends React.Component {
   static propTypes = {
     constraint: PropTypes.object,
+    debugValue: PropTypes.any,
   };
 
   // Can't be static: needs to access props.

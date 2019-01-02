@@ -57,6 +57,8 @@ export default class MetadataSelector extends React.Component {
     // Called with list of all options.
     // Must return a valid value.
     // Beware: If you return an invalid value from this, you're screwed.
+    
+    debugValue: PropTypes.any,
   };
 
   static defaultProps = {
@@ -68,20 +70,21 @@ export default class MetadataSelector extends React.Component {
       return firstEnabledOption && firstEnabledOption.value;
     },
     // Replace with first enabled option.
+    debugValue: '',
   };
 
   constructor(props) {
     super(props);
-    console.log('MetadataSelector.cons: meta:', objectId(props.meta))
+    console.log(`MetadataSelector[${this.props.debugValue}].cons: meta:`, objectId(props.meta))
   }
 
   componentDidMount() {
-    console.log('MetadataSelector.componentDidMount')
+    console.log(`MetadataSelector[${this.props.debugValue}].componentDidMount`)
   }
 
   componentDidUpdate(prevProps) {
-    console.log('MetadataSelector.cDU: meta:', objectId(this.props.meta))
-    console.log(`MetadataSelector.componentDidMount: props.meta ${this.props.meta === prevProps.meta ? '===' : '!=='} prevProps.meta`)
+    console.log(`MetadataSelector[${this.props.debugValue}].cDU: meta:`, objectId(this.props.meta))
+    console.log(`MetadataSelector[${this.props.debugValue}].componentDidMount: props.meta ${this.props.meta === prevProps.meta ? '===' : '!=='} prevProps.meta`)
   }
 
   // Memoize computation of options list
@@ -116,7 +119,7 @@ export default class MetadataSelector extends React.Component {
   allOptions = memoize(
     (getOptionValue, getOptionLabel, meta) =>
       flow(
-        tap(meta => console.log('MetadataSelector.allOptions: meta:', objectId(meta))),
+        tap(meta => console.log(`MetadataSelector[${this.props.debugValue}].allOptions: meta:`, objectId(meta))),
         map(m => ({
           context: m,
           value: getOptionValue(m),
@@ -128,7 +131,7 @@ export default class MetadataSelector extends React.Component {
         })),
         map(option => assign(option, { label: getOptionLabel(option) })),
         sortBy('label'),
-        // tap(m => console.log('MetadataSelector.allOptions', m)),
+        // tap(m => console.log(`MetadataSelector[${this.props.debugValue}].allOptions`, m)),
       )(meta)
   );
 
@@ -138,11 +141,11 @@ export default class MetadataSelector extends React.Component {
   //
   // TODO: memoize by parameterizing on meta, getOptionIsDisabled
   constrainedOptions =
-    meta => flow(
-      tap(meta => console.log('MetadataSelector.constrainedOptions: meta:', objectId(meta))),
+    (meta, getOptionIsDisabled) => flow(
+      tap(meta => console.log(`MetadataSelector[${this.props.debugValue}].constrainedOptions: meta:`, objectId(meta)), 'getOptionIsDisabled:', objectId(getOptionIsDisabled)),
       map(option =>
-        assign(option, { isDisabled: this.props.getOptionIsDisabled(option) })),
-      // tap(m => console.log('MetadataSelector.constrainedOptions', m))
+        assign(option, { isDisabled: getOptionIsDisabled(option) })),
+      // tap(m => console.log(`MetadataSelector[${this.props.debugValue}].constrainedOptions`, m))
     )(
       this.allOptions(
         this.props.getOptionValue,
@@ -153,29 +156,29 @@ export default class MetadataSelector extends React.Component {
 
   // Form the grouped options from the constrained options.
   groupedOptions = meta =>
-    this.props.groupOptions(this.constrainedOptions(meta));
+    this.props.groupOptions(this.constrainedOptions(meta, this.props.getOptionIsDisabled));
 
   isValidValue = value => some(
     option => !option.isDisabled && isEqual(option.value, value)
-  )(this.constrainedOptions(this.props.meta));
+  )(this.constrainedOptions(this.props.meta, this.props.getOptionIsDisabled));
 
   // Value-exchange functions
 
   optionFor = value => find(
     option => isEqual(option.value, value),
-    this.constrainedOptions(this.props.meta)
+    this.constrainedOptions(this.props.meta, this.props.getOptionIsDisabled)
   );
 
   handleChange = option => this.props.onChange(option.value);
 
   render() {
-    console.log('MetadataSelector.render')
+    console.log(`MetadataSelector[${this.props.debugValue}].render`)
     // TODO: Pass through all the Select props.
 
     let valueToUse = this.props.value;
     if (!this.isValidValue(this.props.value)) {
       valueToUse = this.props.replaceInvalidValue(
-        this.constrainedOptions(this.props.meta)
+        this.constrainedOptions(this.props.meta, this.props.getOptionIsDisabled)
       );
       this.props.onChange(valueToUse);
       // return null;

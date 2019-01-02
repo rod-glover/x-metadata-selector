@@ -62,6 +62,7 @@ export default class VariableSelector extends Component {
         getOptionLabel={VariableSelector.getOptionLabel}
         groupOptions={VariableSelector.groupOptions}
         components={{ Option: VariableSelector.Option }}
+        debugValue='Variable'
       />
     );
   }

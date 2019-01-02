@@ -19,6 +19,7 @@ export default class EmissionsScenarioSelector extends Component {
       <ConstrainedMetadataSelector
         {...this.props}
         getOptionValue={EmissionsScenarioSelector.getOptionValue}
+        debugValue='Emissions'
       />
     );
   }

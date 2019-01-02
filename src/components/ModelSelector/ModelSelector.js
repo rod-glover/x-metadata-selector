@@ -9,6 +9,7 @@ import './ModelSelector.css';
 export default class ModelSelector extends Component {
   static propTypes = {
     constraint: PropTypes.object,
+    debugValue: PropTypes.any,
   };
 
   static getOptionValue = metadatum => metadatum.model_id;
@@ -19,6 +20,7 @@ export default class ModelSelector extends Component {
       <ConstrainedMetadataSelector
         {...this.props}
         getOptionValue={ModelSelector.getOptionValue}
+        debugValue='Model'
       />
     );
   }
