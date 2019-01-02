@@ -1,4 +1,4 @@
-const objectIdMap = new WeakMap();
+const objectIdMap = new Map();
 let objectCount = 0;
 
 export default function objectId(object){
