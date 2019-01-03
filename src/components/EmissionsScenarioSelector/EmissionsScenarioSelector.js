@@ -14,7 +14,7 @@ export default class EmissionsScenarioSelector extends Component {
   static getOptionValue = metadatum => metadatum.experiment;
 
   render() {
-    console.log('EmissionsScenarioSelector.render')
+    console.log('EmissionsScenarioSelector.render: constraint', this.props.constraint)
     return (
       <ConstrainedMetadataSelector
         {...this.props}

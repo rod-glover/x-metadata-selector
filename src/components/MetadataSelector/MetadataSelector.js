@@ -66,7 +66,9 @@ export default class MetadataSelector extends React.Component {
     getOptionIsDisabled: constant(false),
     groupOptions: identity,
     replaceInvalidValue: options => {
+      console.log(`replaceInvalidValue: options`, options)
       const firstEnabledOption = find({ isDisabled: false }, options);
+      console.log(`replaceInvalidValue: firstEnabledOption`, firstEnabledOption)
       return firstEnabledOption && firstEnabledOption.value;
     },
     // Replace with first enabled option.

@@ -64,9 +64,11 @@ class App extends Component {
 
   anySelectorConstraint =
     (thisSelector, selectorOrder, state) => flow(
+      tap(() => console.log(`anySelectorConstraint: thisSelector`, thisSelector, `selectorOrder`, selectorOrder, 'state', state)),
       takeWhile(selector => selector !== thisSelector),
       map(selector => state[selector]),
       objUnion,
+      tap(result => console.log(`anySelectorConstraint: result`, result))
     )(selectorOrder)
   ;
 
