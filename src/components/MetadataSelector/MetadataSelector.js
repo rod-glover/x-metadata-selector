@@ -141,8 +141,8 @@ export default class MetadataSelector extends React.Component {
   //
   // TODO: memoize by parameterizing on meta, getOptionIsDisabled
   constrainedOptions =
-    (meta, getOptionIsDisabled) => flow(
-      tap(meta => console.log(`MetadataSelector[${this.props.debugValue}].constrainedOptions: meta:`, objectId(meta)), 'getOptionIsDisabled:', objectId(getOptionIsDisabled)),
+    (getOptionIsDisabled, meta) => flow(
+      tap(meta => console.log(`MetadataSelector[${this.props.debugValue}].constrainedOptions: meta:`, objectId(meta), 'getOptionIsDisabled:', objectId(getOptionIsDisabled))),
       map(option =>
         assign(option, { isDisabled: getOptionIsDisabled(option) })),
       // tap(m => console.log(`MetadataSelector[${this.props.debugValue}].constrainedOptions`, m))
@@ -156,17 +156,17 @@ export default class MetadataSelector extends React.Component {
 
   // Form the grouped options from the constrained options.
   groupedOptions = meta =>
-    this.props.groupOptions(this.constrainedOptions(meta, this.props.getOptionIsDisabled));
+    this.props.groupOptions(this.constrainedOptions(this.props.getOptionIsDisabled, meta));
 
   isValidValue = value => some(
     option => !option.isDisabled && isEqual(option.value, value)
-  )(this.constrainedOptions(this.props.meta, this.props.getOptionIsDisabled));
+  )(this.constrainedOptions(this.props.getOptionIsDisabled, this.props.meta));
 
   // Value-exchange functions
 
   optionFor = value => find(
     option => isEqual(option.value, value),
-    this.constrainedOptions(this.props.meta, this.props.getOptionIsDisabled)
+    this.constrainedOptions(this.props.getOptionIsDisabled, this.props.meta)
   );
 
   handleChange = option => this.props.onChange(option.value);
@@ -178,7 +178,7 @@ export default class MetadataSelector extends React.Component {
     let valueToUse = this.props.value;
     if (!this.isValidValue(this.props.value)) {
       valueToUse = this.props.replaceInvalidValue(
-        this.constrainedOptions(this.props.meta, this.props.getOptionIsDisabled)
+        this.constrainedOptions(this.props.getOptionIsDisabled, this.props.meta)
       );
       this.props.onChange(valueToUse);
       // return null;
