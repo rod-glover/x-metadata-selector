@@ -75,7 +75,7 @@ export default class MetadataSelector extends React.Component {
 
   constructor(props) {
     super(props);
-    console.log(`MetadataSelector[${this.props.debugValue}].cons: meta:`, objectId(props.meta))
+    console.log(`MetadataSelector[${this.props.debugValue}].cons: meta:`, objectId(props.meta), props.meta)
   }
 
   componentDidMount() {
@@ -112,14 +112,10 @@ export default class MetadataSelector extends React.Component {
   // selection is made. Also, this function is potentially called multiple
   // times per render, depending on the behaviour of downstream functions
   // such as `constrainedOptions` and `props.groupOptions`.
-  //
-  // FIXME: It appears that memoization is not working properly.
-  // Debug logging in `tap` calls appear to show that the inner function
-  // is called more than once per consecutive unique argument. WTF?
   allOptions = memoize(
     (getOptionValue, getOptionLabel, meta) =>
       flow(
-        tap(meta => console.log(`MetadataSelector[${this.props.debugValue}].allOptions: meta:`, objectId(meta))),
+        tap(meta => console.log(`MetadataSelector[${this.props.debugValue}].allOptions: meta:`, objectId(meta), meta)),
         map(m => ({
           context: m,
           value: getOptionValue(m),
@@ -138,31 +134,30 @@ export default class MetadataSelector extends React.Component {
   // Form the list of constrained options from the list of metadata.
   // A constrained option is an option with isDisabled set according to
   // `props.getOptionIsDisabled`.
-  //
-  // TODO: memoize by parameterizing on meta, getOptionIsDisabled
-  constrainedOptions =
+  constrainedOptions = memoize(
     (getOptionIsDisabled, meta) => flow(
-      tap(meta => console.log(`MetadataSelector[${this.props.debugValue}].constrainedOptions: meta:`, objectId(meta), 'getOptionIsDisabled:', objectId(getOptionIsDisabled))),
+      tap(options => {
+        console.log(`MetadataSelector[${this.props.debugValue}].constrainedOptions: meta:`, objectId(meta), meta, 'getOptionIsDisabled:', objectId(getOptionIsDisabled));
+        console.log(`MetadataSelector[${this.props.debugValue}].constrainedOptions: options:`, objectId(options), options);
+      }),
       map(option =>
         assign(option, { isDisabled: getOptionIsDisabled(option) })),
-      // tap(m => console.log(`MetadataSelector[${this.props.debugValue}].constrainedOptions`, m))
+      tap(options => console.log(`MetadataSelector[${this.props.debugValue}].constrainedOptions: result`, options))
     )(
+      // Can't curry a memoized function; have to put it into the flow manually
       this.allOptions(
         this.props.getOptionValue,
         this.props.getOptionLabel,
         meta
       )
-    );
+    )
+  );
 
-  // Form the grouped options from the constrained options.
-  groupedOptions = meta =>
-    this.props.groupOptions(this.constrainedOptions(this.props.getOptionIsDisabled, meta));
+  // Value-exchange functions
 
   isValidValue = value => some(
     option => !option.isDisabled && isEqual(option.value, value)
   )(this.constrainedOptions(this.props.getOptionIsDisabled, this.props.meta));
-
-  // Value-exchange functions
 
   optionFor = value => find(
     option => isEqual(option.value, value),
@@ -175,19 +170,30 @@ export default class MetadataSelector extends React.Component {
     console.log(`MetadataSelector[${this.props.debugValue}].render`)
     // TODO: Pass through all the Select props.
 
+    console.log(`MetadataSelector[${this.props.debugValue}].render: groupedOptions: meta:`, objectId(this.props.meta), this.props.meta)
+    const groupedOptions =
+      this.props.groupOptions(
+        this.constrainedOptions(
+          this.props.getOptionIsDisabled,
+          this.props.meta,
+        ));
+    console.log(`MetadataSelector[${this.props.debugValue}].render: groupedOptions: done`)
+
+
     let valueToUse = this.props.value;
-    if (!this.isValidValue(this.props.value)) {
+    if (!this.isValidValue(valueToUse)) {
+      console.log(`MetadataSelector[${this.props.debugValue}].render: valueToUse`)
       valueToUse = this.props.replaceInvalidValue(
         this.constrainedOptions(this.props.getOptionIsDisabled, this.props.meta)
       );
       this.props.onChange(valueToUse);
-      // return null;
     }
 
+    console.log(`MetadataSelector[${this.props.debugValue}].render: return`)
     return (
       <Select
         isSearchable
-        options={this.groupedOptions(this.props.meta)}
+        options={groupedOptions}
         components={this.props.components}
         value={this.optionFor(valueToUse)}
         onChange={this.handleChange}
