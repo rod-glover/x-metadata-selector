@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Glyphicon } from 'react-bootstrap';
-import { filter, isMatch, pick, some } from 'lodash/fp';
+import { flow, filter, isMatch, pick, some, sortBy } from 'lodash/fp';
 
 import ConstrainedMetadataSelector from '../ConstrainedMetadataSelector';
 
@@ -30,15 +30,21 @@ export default class VariableSelector extends Component {
   //   context => isMatch(this.props.constraint, context)
   // )(option.contexts);
 
-  static groupOptions = options => {
+  static arrangeOptions = options => {
     return [
       {
         label: 'Multi-Year Mean Datasets',
-        options: filter(o => o.value.multi_year_mean)(options),
+        options: flow(
+          filter(o => o.value.multi_year_mean),
+          sortBy('label'),
+        )(options),
       },
       {
         label: 'Time Series Datasets',
-        options: filter(o => !o.value.multi_year_mean)(options),
+        options: flow(
+          filter(o => !o.value.multi_year_mean),
+          sortBy('label'),
+        )(options),
       },
     ];
   };
@@ -60,7 +66,7 @@ export default class VariableSelector extends Component {
         {...this.props}
         getOptionValue={VariableSelector.getOptionValue}
         getOptionLabel={VariableSelector.getOptionLabel}
-        groupOptions={VariableSelector.groupOptions}
+        arrangeOptions={VariableSelector.arrangeOptions}
         components={{ Option: VariableSelector.Option }}
         debugValue='Variable'
       />
