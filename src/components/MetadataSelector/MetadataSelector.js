@@ -10,12 +10,14 @@ import {
   constant,
   identity,
   map,
+  flatMap,
   find,
   sortBy,
   some,
   tap,
   isEqual,
   isUndefined,
+  isArray,
 } from 'lodash/fp';
 import { groupByGeneral } from '../../utils/fp';
 
@@ -40,9 +42,12 @@ export default class MetadataSelector extends React.Component {
     getOptionIsDisabled: PropTypes.func,
     // Maps an option to a value for its isDisabled property.
     // Typically makes use of option.context to determine this.
-    
-    groupOptions: PropTypes.func,
-    // Maps the raw option list to a grouped options list for Select.
+
+    arrangeOptions: PropTypes.func,
+    // Arranges options for consumption by Select.
+    // This may mean sorting options, grouping options (as provided for
+    // by Select), or any other operation(s) that arrange the options
+    // for presentation in Select.
 
     components: PropTypes.any,
 
@@ -64,10 +69,15 @@ export default class MetadataSelector extends React.Component {
   static defaultProps = {
     getOptionLabel: option => option.value.toString(),
     getOptionIsDisabled: constant(false),
-    groupOptions: identity,
+    arrangeOptions: options => sortBy('label')(options),
     replaceInvalidValue: options => {
       console.log(`replaceInvalidValue: options`, options)
-      const firstEnabledOption = find({ isDisabled: false }, options);
+      const allOptions =
+        options[0] && isArray(options[0].options) ?
+        flatMap('options')(options) :
+        options;
+      console.log(`replaceInvalidValue: allOptions`, allOptions)
+      const firstEnabledOption = find({ isDisabled: false }, allOptions);
       console.log(`replaceInvalidValue: firstEnabledOption`, firstEnabledOption)
       return firstEnabledOption && firstEnabledOption.value;
     },
@@ -113,7 +123,11 @@ export default class MetadataSelector extends React.Component {
   // component is rendered, which, amongst other cases, is every time a
   // selection is made. Also, this function is potentially called multiple
   // times per render, depending on the behaviour of downstream functions
-  // such as `constrainedOptions` and `props.groupOptions`.
+  // such as `constrainedOptions` and `props.arrangeOptions`.
+  //
+  // FIXME: It appears that memoization is not working properly.
+  // Debug logging in `tap` calls appear to show that the inner function
+  // is called more than once per consecutive unique argument. WTF?
   allOptions = memoize(
     (getOptionValue, getOptionLabel, meta) =>
       flow(
@@ -128,7 +142,6 @@ export default class MetadataSelector extends React.Component {
             value: group.by,
         })),
         map(option => assign(option, { label: getOptionLabel(option) })),
-        sortBy('label'),
         // tap(m => console.log(`MetadataSelector[${this.props.debugValue}].allOptions`, m)),
       )(meta)
   );
@@ -172,21 +185,22 @@ export default class MetadataSelector extends React.Component {
     console.log(`MetadataSelector[${this.props.debugValue}].render`)
     // TODO: Pass through all the Select props.
 
-    console.log(`MetadataSelector[${this.props.debugValue}].render: groupedOptions: meta:`, objectId(this.props.meta), this.props.meta)
-    const groupedOptions =
-      this.props.groupOptions(
+    console.log(`MetadataSelector[${this.props.debugValue}].render: arrangedOptions: meta:`, objectId(this.props.meta), this.props.meta)
+    const arrangedOptions =
+      this.props.arrangeOptions(
         this.constrainedOptions(
           this.props.getOptionIsDisabled,
           this.props.meta,
         ));
-    console.log(`MetadataSelector[${this.props.debugValue}].render: groupedOptions: done`)
+    console.log(`MetadataSelector[${this.props.debugValue}].render: arrangedOptions: result:`, arrangedOptions)
 
 
     let valueToUse = this.props.value;
     if (!this.isValidValue(valueToUse)) {
       console.log(`MetadataSelector[${this.props.debugValue}].render: valueToUse`)
       valueToUse = this.props.replaceInvalidValue(
-        this.constrainedOptions(this.props.getOptionIsDisabled, this.props.meta)
+        // this.constrainedOptions(this.props.getOptionIsDisabled, this.props.meta)
+        arrangedOptions
       );
       this.props.onChange(valueToUse);
     }
@@ -195,7 +209,7 @@ export default class MetadataSelector extends React.Component {
     return (
       <Select
         isSearchable
-        options={groupedOptions}
+        options={arrangedOptions}
         components={this.props.components}
         value={this.optionFor(valueToUse)}
         onChange={this.handleChange}

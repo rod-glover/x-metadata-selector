@@ -130,7 +130,10 @@ class App extends Component {
 
   render() {
     console.log('App.render')
-    const mevFilteredMetadata = filter(objUnion(this.state.mev))(meta);
+    const mevConstraint = objUnion(this.state.mev);
+    console.log('App.render: mevConstraint', mevConstraint)
+    const mevFilteredMetadata = filter(mevConstraint)(meta);
+    console.log('App.render: mevFilteredMetadata', mevFilteredMetadata)
     const mevdFilteredMetadata = filter(this.state.dataset)(mevFilteredMetadata);
 
     return (
