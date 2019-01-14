@@ -1,11 +1,11 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import ConstrainedMetadataSelector from '../ConstrainedMetadataSelector';
+import ConstrainedMetadataSelector from '../../ConstrainedMetadataSelector/ConstrainedMetadataSelector';
 
 import './DatasetSelector.css';
 import { flow, fromPairs, pick, map, uniq } from 'lodash/fp';
-import { mapWithKey } from '../../utils/fp';
+import { mapWithKey } from '../../../utils/fp';
 
 
 export default class DatasetSelector extends Component {

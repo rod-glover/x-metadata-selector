@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import { Glyphicon } from 'react-bootstrap';
 import { flow, filter, isMatch, pick, some, sortBy } from 'lodash/fp';
 
-import ConstrainedMetadataSelector from '../ConstrainedMetadataSelector';
+import ConstrainedMetadataSelector from '../../ConstrainedMetadataSelector/ConstrainedMetadataSelector';
 
 import './VariableSelector.css';
 

@@ -5,10 +5,10 @@ import {
   flow, takeWhile, slice, map, reduce, filter, tap,
   sortBy
 } from 'lodash/fp';
-import { objUnion } from '../../utils/fp';
+import { objUnion } from '../../../utils/fp';
 import _ from 'lodash';
 
-import meta from '../../assets/meta'
+import meta from '../../../assets/meta'
 import './DemoMEV.css';
 import VariableSelector from '../VariableSelector';
 import ModelSelector from '../ModelSelector';

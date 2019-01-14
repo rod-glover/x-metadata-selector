@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import ConstrainedMetadataSelector from '../ConstrainedMetadataSelector';
+import ConstrainedMetadataSelector from '../../ConstrainedMetadataSelector/ConstrainedMetadataSelector';
 
 import './ModelSelector.css';
 
