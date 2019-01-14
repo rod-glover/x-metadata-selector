@@ -5,8 +5,8 @@ import { Navbar, Nav, NavItem } from 'react-bootstrap';
 import { Route, Redirect, Switch } from 'react-router-dom';
 import { LinkContainer } from 'react-router-bootstrap';
 
-import DemoMev from '../DemoMEV';
-import DemoP2A from '../DemoP2A';
+import DemoMev from '../demo-MEV/DemoMEV';
+import DemoP2A from '../demo-P2A/DemoP2A';
 
 const navSpec = [
   { label: 'MEV', path: 'MEV', component: DemoMev },
