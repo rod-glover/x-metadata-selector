@@ -9,7 +9,7 @@ import { objUnion } from '../../utils/fp';
 import _ from 'lodash';
 
 import meta from '../../assets/meta'
-import './App.css';
+import './DemoMEV.css';
 import VariableSelector from '../VariableSelector';
 import ModelSelector from '../ModelSelector';
 import EmissionsScenarioSelector from '../EmissionsScenarioSelector';
@@ -21,7 +21,7 @@ function stringify(obj) {
 }
 
 
-class App extends Component {
+class DemoMEV extends Component {
   state = {
     mev: {
       model: {
@@ -81,7 +81,7 @@ class App extends Component {
   anySelector = sel => {
     switch (sel) {
       case 'model': return (
-        <Col {...App.colProps}>
+        <Col {...DemoMEV.colProps}>
           <ModelSelector
             meta={meta}
             constraint={this.anySelectorConstraint('model', this.state.selectorOrder, this.state.mev)}
@@ -92,7 +92,7 @@ class App extends Component {
         </Col>
       );
       case 'emissions': return (
-        <Col {...App.colProps}>
+        <Col {...DemoMEV.colProps}>
           <EmissionsScenarioSelector
             meta={meta}
             constraint={this.anySelectorConstraint('emissions', this.state.selectorOrder, this.state.mev)}
@@ -103,7 +103,7 @@ class App extends Component {
         </Col>
       );
       case 'variable': return (
-        <Col {...App.colProps}>
+        <Col {...DemoMEV.colProps}>
           <VariableSelector
             meta={meta}
             constraint={this.anySelectorConstraint('variable', this.state.selectorOrder, this.state.mev)}
@@ -129,11 +129,11 @@ class App extends Component {
   });
 
   render() {
-    console.log('App.render')
+    console.log('DemoMEV.render')
     const mevConstraint = objUnion(this.state.mev);
-    console.log('App.render: mevConstraint', mevConstraint)
+    console.log('DemoMEV.render: mevConstraint', mevConstraint)
     const mevFilteredMetadata = filter(mevConstraint)(meta);
-    console.log('App.render: mevFilteredMetadata', mevFilteredMetadata)
+    console.log('DemoMEV.render: mevFilteredMetadata', mevFilteredMetadata)
     const mevdFilteredMetadata = filter(this.state.dataset)(mevFilteredMetadata);
 
     return (
@@ -144,7 +144,7 @@ class App extends Component {
         <Row>
             {
               this.state.selectorOrder.map((sel, index) => (
-                <Col {...App.colProps} className='text-center'>
+                <Col {...DemoMEV.colProps} className='text-center'>
                   <h2>
                     {
                       index > 0 &&
@@ -169,12 +169,12 @@ class App extends Component {
                 </Col>
               ))
             }
-            <Col {...App.colProps}><h2>Filtered metadata</h2></Col>
+            <Col {...DemoMEV.colProps}><h2>Filtered metadata</h2></Col>
         </Row>
 
         <Row>
           {map(sel => this.anySelector(sel))(this.state.selectorOrder)}
-          <Col {...App.colProps}>
+          <Col {...DemoMEV.colProps}>
             <ul>
               {
                 flow(
@@ -195,7 +195,7 @@ class App extends Component {
         </Row>
 
         <Row>
-          <Col {...App.colProps}>
+          <Col {...DemoMEV.colProps}>
             <DatasetSelector
               meta={mevFilteredMetadata}
               value={this.state.dataset}
@@ -203,7 +203,7 @@ class App extends Component {
             />
             {stringify(this.state.dataset)}
           </Col>
-          <Col {...App.colProps} lgOffset={6} mdOffset={6} smOffset={6}>
+          <Col {...DemoMEV.colProps} lgOffset={6} mdOffset={6} smOffset={6}>
             <ul>
               {
                 flow(
@@ -223,4 +223,4 @@ class App extends Component {
   }
 }
 
-export default App;
+export default DemoMEV;

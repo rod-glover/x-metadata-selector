@@ -1,0 +1,6 @@
+{
+  "name": "DemoMEV",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./DemoMEV.js"
+}
