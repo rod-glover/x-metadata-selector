@@ -18,6 +18,7 @@ import {
   isEqual,
   isUndefined,
   isArray,
+  noop,
 } from 'lodash/fp';
 import { groupByGeneral } from '../../utils/fp';
 
@@ -82,6 +83,7 @@ export default class MetadataSelector extends React.Component {
       return firstEnabledOption && firstEnabledOption.value;
     },
     // Replace with first enabled option.
+    onChange: noop,
     debugValue: '',
   };
 
