@@ -3,7 +3,7 @@ import React from 'react';
 
 import './ConstrainedMetadataSelector.css';
 import { isMatch, some, omit } from 'lodash/fp';
-import MetadataSelector from '../MetadataSelector';
+import MetadataSelector from '../GroupingSelector';
 
 
 export default class ConstrainedMetadataSelector extends React.Component {
@@ -17,7 +17,7 @@ export default class ConstrainedMetadataSelector extends React.Component {
     // constraint. It is important that the function be a distinct function
     // for each constraint, instead of the same function (object) that closes
     // over `this.props.constraint`. The change in prop (`getOptionIsDisabeled`)
-    // tells `MetadataSelector` that it must re-render. (Otherwise it has the
+    // tells `GroupingSelector` that it must re-render. (Otherwise it has the
     // option not to, which in this case it takes, causing an error if the
     // same (ref), but differently-behaving function is passed in.)
     //

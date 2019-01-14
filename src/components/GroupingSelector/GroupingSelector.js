@@ -1,3 +1,47 @@
+// Grouping selector. This component returns a React Select v2 selector with
+// a set of options constructed from a list of basis items, many of which
+// may be coalesced into (i.e., represented by) a single select option.
+//
+// It works as follows:
+//
+//  - Each element of the basis list is mapped to a value (which can be an
+//    arbitrary JS object) that represents it. Many basis elements can map
+//    to the same value. The user supplies the function that maps basis item
+//    to representative value.
+//
+//  - Each unique representative value becomes an option in the selector.
+//    An option is an object containing the following properties:
+//
+//      - `value`: The representative value.
+//
+//      - `contexts`: The list of all basis items which mapped to this value.
+//
+//        This list can be used to determine enabled/disabled status of an
+//        option, for example.
+//
+//      - `isDisabled`: Set to `true` if the option is disabled.
+//
+//        The user supplies the function that maps an option to the value for
+//        `isDisabled`. This function can refer to `option.value` and
+//        `option.contexts`.
+//
+//      - `label`: The string presented to the user to represent the option.
+//
+//        The user supplies the function that maps an option to the label
+//        string.
+//
+//  - The list of generated options is finally passed through a user-supplied
+//    function `arrangeOptions` that can be used to sort options, form option
+//    groups, or otherwise ready them for consumption by the rendered React
+//    Select v2 selector.
+//
+//  - Selection is communicated (via props `value`, `onChange`) as the
+//    option value only. (This differs from React Select v2, which communicates
+//    the entire option value, and may or may not be a wise choice.)
+//
+//  - If an invalid value is supplied to the selector, it is replaced with the
+//    value returned by the function prop `replaceInvalidValue`.
+
 import PropTypes from 'prop-types';
 import React from 'react';
 import Select from 'react-select';
@@ -24,17 +68,17 @@ import { groupByGeneral } from '../../utils/fp';
 
 import objectId from '../../debug-utils/object-id';
 
-import './MetadataSelector.css';
+import './GroupingSelector.css';
 
-export default class MetadataSelector extends React.Component {
+export default class GroupingSelector extends React.Component {
   static propTypes = {
-    meta: PropTypes.array.isRequired,
-    // List of metadata items the selector will build its options from.
+    bases: PropTypes.array.isRequired,
+    // List of basis items the selector will build its options from.
 
     getOptionValue: PropTypes.func.isRequired,
-    // Maps a metadata item to the `value` property of an option.
-    // This function can map many metadata items to the same value;
-    // MetadataSelector collects all metadata items with the same
+    // Maps a basiss item to the `value` property of an option.
+    // This function can map many basis items to the same value;
+    // GroupingSelector collects all basis items with the same
     // value into a single option.
 
     getOptionLabel: PropTypes.func,
@@ -89,7 +133,7 @@ export default class MetadataSelector extends React.Component {
 
   constructor(props) {
     super(props);
-    console.log(`MetadataSelector[${this.props.debugValue}].cons: meta:`, objectId(props.meta), props.meta)
+    console.log(`MetadataSelector[${this.props.debugValue}].cons: meta:`, objectId(props.bases), props.bases)
   }
 
   componentDidMount() {
@@ -97,8 +141,8 @@ export default class MetadataSelector extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    console.log(`MetadataSelector[${this.props.debugValue}].cDU: meta:`, objectId(this.props.meta))
-    console.log(`MetadataSelector[${this.props.debugValue}].componentDidMount: props.meta ${this.props.meta === prevProps.meta ? '===' : '!=='} prevProps.meta`)
+    console.log(`MetadataSelector[${this.props.debugValue}].cDU: meta:`, objectId(this.props.bases))
+    console.log(`MetadataSelector[${this.props.debugValue}].componentDidMount: props.meta ${this.props.bases === prevProps.bases ? '===' : '!=='} prevProps.meta`)
   }
 
   // Memoize computation of options list
@@ -113,23 +157,19 @@ export default class MetadataSelector extends React.Component {
   //      and props.onChange.
   //    contexts: [ <object> ]
   //      The contexts in which the option occurs. A context is a
-  //      metadata item from which an equal option value is generated.
-  //      (Contexts are used to determine enabled/disabled status,
+  //      basis item from which an equal option value is generated.
+  //      (Contexts are often used to determine enabled/disabled status,
   //      but this function is not concerned with that status.)
   //    label: <string>
   //      The label for the option that appears in the selector UI.
   //  }
   //
   // This function is memoized because otherwise it would have to reprocess
-  // the large list of metadata (`props.meta`) into options every time this
+  // the large list of metadata (`props.bases`) into options every time this
   // component is rendered, which, amongst other cases, is every time a
   // selection is made. Also, this function is potentially called multiple
   // times per render, depending on the behaviour of downstream functions
   // such as `constrainedOptions` and `props.arrangeOptions`.
-  //
-  // FIXME: It appears that memoization is not working properly.
-  // Debug logging in `tap` calls appear to show that the inner function
-  // is called more than once per consecutive unique argument. WTF?
   allOptions = memoize(
     (getOptionValue, getOptionLabel, meta) =>
       flow(
@@ -144,7 +184,7 @@ export default class MetadataSelector extends React.Component {
             value: group.by,
         })),
         map(option => assign(option, { label: getOptionLabel(option) })),
-        // tap(m => console.log(`MetadataSelector[${this.props.debugValue}].allOptions`, m)),
+        // tap(m => console.log(`GroupingSelector[${this.props.debugValue}].allOptions`, m)),
       )(meta)
   );
 
@@ -174,11 +214,11 @@ export default class MetadataSelector extends React.Component {
 
   isValidValue = value => some(
     option => !option.isDisabled && isEqual(option.value, value)
-  )(this.constrainedOptions(this.props.getOptionIsDisabled, this.props.meta));
+  )(this.constrainedOptions(this.props.getOptionIsDisabled, this.props.bases));
 
   optionFor = value => find(
     option => isEqual(option.value, value),
-    this.constrainedOptions(this.props.getOptionIsDisabled, this.props.meta)
+    this.constrainedOptions(this.props.getOptionIsDisabled, this.props.bases)
   );
 
   handleChange = option => this.props.onChange(option.value);
@@ -187,12 +227,12 @@ export default class MetadataSelector extends React.Component {
     console.log(`MetadataSelector[${this.props.debugValue}].render`)
     // TODO: Pass through all the Select props.
 
-    console.log(`MetadataSelector[${this.props.debugValue}].render: arrangedOptions: meta:`, objectId(this.props.meta), this.props.meta)
+    console.log(`MetadataSelector[${this.props.debugValue}].render: arrangedOptions: meta:`, objectId(this.props.bases), this.props.bases)
     const arrangedOptions =
       this.props.arrangeOptions(
         this.constrainedOptions(
           this.props.getOptionIsDisabled,
-          this.props.meta,
+          this.props.bases,
         ));
     console.log(`MetadataSelector[${this.props.debugValue}].render: arrangedOptions: result:`, arrangedOptions)
 
@@ -201,7 +241,7 @@ export default class MetadataSelector extends React.Component {
     if (!this.isValidValue(valueToUse)) {
       console.log(`MetadataSelector[${this.props.debugValue}].render: valueToUse`)
       valueToUse = this.props.replaceInvalidValue(
-        // this.constrainedOptions(this.props.getOptionIsDisabled, this.props.meta)
+        // this.constrainedOptions(this.props.getOptionIsDisabled, this.props.bases)
         arrangedOptions
       );
       this.props.onChange(valueToUse);

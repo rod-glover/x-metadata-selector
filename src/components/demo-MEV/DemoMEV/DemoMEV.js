@@ -83,7 +83,7 @@ class DemoMEV extends Component {
       case 'model': return (
         <Col {...DemoMEV.colProps}>
           <ModelSelector
-            meta={meta}
+            bases={meta}
             constraint={this.anySelectorConstraint('model', this.state.selectorOrder, this.state.mev)}
             value={this.state.mev.model.model_id}
             onChange={this.anyHandleChangeModel}
@@ -94,7 +94,7 @@ class DemoMEV extends Component {
       case 'emissions': return (
         <Col {...DemoMEV.colProps}>
           <EmissionsScenarioSelector
-            meta={meta}
+            bases={meta}
             constraint={this.anySelectorConstraint('emissions', this.state.selectorOrder, this.state.mev)}
             value={this.state.mev.emissions.experiment}
             onChange={this.anyHandleChangeEmissions}
@@ -105,7 +105,7 @@ class DemoMEV extends Component {
       case 'variable': return (
         <Col {...DemoMEV.colProps}>
           <VariableSelector
-            meta={meta}
+            bases={meta}
             constraint={this.anySelectorConstraint('variable', this.state.selectorOrder, this.state.mev)}
             value={this.state.mev.variable}
             onChange={this.anyHandleChangeVariable}
@@ -197,7 +197,7 @@ class DemoMEV extends Component {
         <Row>
           <Col {...DemoMEV.colProps}>
             <DatasetSelector
-              meta={mevFilteredMetadata}
+              bases={mevFilteredMetadata}
               value={this.state.dataset}
               onChange={this.handleChangeDataset}
             />

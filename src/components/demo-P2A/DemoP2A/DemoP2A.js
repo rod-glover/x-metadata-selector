@@ -59,7 +59,7 @@ class DemoP2A extends Component {
           <Col {...DemoP2A.colProps}>
             <h2>Time Period</h2>
             <TimePeriodSelector
-              meta={prefilteredMeta}
+              bases={prefilteredMeta}
               value={this.state.timePeriod}
               onChange={this.handleChangeTimePeriod}
             />
@@ -68,7 +68,7 @@ class DemoP2A extends Component {
           <Col {...DemoP2A.colProps}>
             <h2>Variable</h2>
             <VariableSelector
-              meta={prefilteredMeta}
+              bases={prefilteredMeta}
               value={this.state.variable}
               onChange={this.handleChangeVariable}
             />
