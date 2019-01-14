@@ -1,0 +1,8 @@
+:global(h1) {
+  font-size: 1.5em;
+}
+
+:global(h2) {
+  font-size: 1.2em;
+  text-transform: capitalize;
+}
