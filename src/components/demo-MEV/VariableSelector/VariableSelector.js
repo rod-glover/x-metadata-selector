@@ -25,11 +25,6 @@ export default class VariableSelector extends Component {
   static getOptionLabel = ({ value: { variable_id, variable_name }}) =>
     `${variable_id} - ${variable_name}`;
 
-  // Can't be static: needs to access props.
-  // getOptionIsDisabled = option => !some(
-  //   context => isMatch(this.props.constraint, context)
-  // )(option.contexts);
-
   static arrangeOptions = options => {
     return [
       {
@@ -59,8 +54,6 @@ export default class VariableSelector extends Component {
     )};
 
   render() {
-    // return 'VariableSelector dummy';
-    console.log('VariableSelector.render')
     return (
       <ConstrainedMetadataSelector
         {...this.props}
@@ -68,6 +61,7 @@ export default class VariableSelector extends Component {
         getOptionLabel={VariableSelector.getOptionLabel}
         arrangeOptions={VariableSelector.arrangeOptions}
         components={{ Option: VariableSelector.Option }}
+        debug={false}
         debugValue='Variable'
       />
     );
