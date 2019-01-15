@@ -2,6 +2,13 @@
 // a set of options constructed from a list of basis items, many of which
 // may be coalesced into (i.e., represented by) a single select option.
 //
+// The motivation for this selector is to unify the various metadata-based
+// selectors (for model, emissions, variable, dataset). Each one reduces
+//  a list of metadata items (objects containing props that characterize
+//  a dataset, such as model, emissions, variable, start and end date, etc.).
+// Each such selector reduces the entire list of metadata to a smaller list
+// of unique values that represent a single characteristic (e.g., model).
+//
 // It works as follows:
 //
 //  - Each element of the basis list is mapped to a value (which can be an
@@ -21,9 +28,10 @@
 //
 //      - `isDisabled`: Set to `true` if the option is disabled.
 //
-//        The user supplies the function that maps an option to the value for
-//        `isDisabled`. This function can refer to `option.value` and
-//        `option.contexts`.
+//        The user supplies the function `getOptionIsDisabled` that maps an
+//        option to the value for `isDisabled`. This function can refer to
+//        `option.value` and `option.contexts`. By default,
+//        `getOptionIsDisabled` always returns `false` (option enabled).
 //
 //      - `label`: The string presented to the user to represent the option.
 //
@@ -34,13 +42,21 @@
 //    function `arrangeOptions` that can be used to sort options, form option
 //    groups, or otherwise ready them for consumption by the rendered React
 //    Select v2 selector.
+//    By default, `arrangeOptions` sorts the options by the label string.
 //
-//  - Selection is communicated (via props `value`, `onChange`) as the
-//    option value only. (This differs from React Select v2, which communicates
-//    the entire option value, and may or may not be a wise choice.)
+//  - The active selection is communicated, via props `value` and `onChange`,
+//    as the option value only. (This differs from React Select v2,
+//    which communicates the entire option value. Introducing this difference
+//    may or may not prove wise; it is convenient for the immeidate application
+//    in Climate Exporer.)
 //
 //  - If an invalid value is supplied to the selector, it is replaced with the
-//    value returned by the function prop `replaceInvalidValue`.
+//    value returned by the function prop `replaceInvalidValue`. An invalid
+//    value is any value that does not match an enabled option value, or `null`.
+//    `null` is a valid value, and has the universal meaning, 'no selection'.
+//    Warning: This function must return a valid value, or an error will occur.
+//    By default, `replaceInvalidValue` is a function that returns the value
+//    of the first enabled option, or else `null` if no such option exists.
 
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -109,25 +125,30 @@ export default class GroupingSelector extends React.Component {
     // Beware: If you return an invalid value from this, you're screwed.
     
     debugValue: PropTypes.any,
+    // For debugging, what else?
   };
 
   static defaultProps = {
     getOptionLabel: option => option.value.toString(),
+
     getOptionIsDisabled: constant(false),
+
     arrangeOptions: options => sortBy('label')(options),
+
     replaceInvalidValue: options => {
       console.log(`replaceInvalidValue: options`, options)
       const allOptions =
         options[0] && isArray(options[0].options) ?
-        flatMap('options')(options) :
-        options;
+          flatMap('options')(options) :
+          options;
       console.log(`replaceInvalidValue: allOptions`, allOptions)
       const firstEnabledOption = find({ isDisabled: false }, allOptions);
       console.log(`replaceInvalidValue: firstEnabledOption`, firstEnabledOption)
-      return firstEnabledOption && firstEnabledOption.value;
+      return firstEnabledOption ? firstEnabledOption.value : null;
     },
-    // Replace with first enabled option.
+
     onChange: noop,
+
     debugValue: '',
   };
 
@@ -165,7 +186,7 @@ export default class GroupingSelector extends React.Component {
   //  }
   //
   // This function is memoized because otherwise it would have to reprocess
-  // the large list of metadata (`props.bases`) into options every time this
+  // the large list of basis items (`props.bases`) into options every time this
   // component is rendered, which, amongst other cases, is every time a
   // selection is made. Also, this function is potentially called multiple
   // times per render, depending on the behaviour of downstream functions
@@ -211,15 +232,23 @@ export default class GroupingSelector extends React.Component {
   );
 
   // Value-exchange functions
+  // `null` is a valid value and means 'no selection'.
+  // `undefined` is not a valid value.
 
-  isValidValue = value => some(
-    option => !option.isDisabled && isEqual(option.value, value)
-  )(this.constrainedOptions(this.props.getOptionIsDisabled, this.props.bases));
+  isValidValue = value =>
+    value === null ||
+    some(
+      option => !option.isDisabled && isEqual(option.value, value),
+      this.constrainedOptions(this.props.getOptionIsDisabled, this.props.bases)
+    );
 
-  optionFor = value => find(
-    option => isEqual(option.value, value),
-    this.constrainedOptions(this.props.getOptionIsDisabled, this.props.bases)
-  );
+  optionFor = value =>
+    value === null ?
+      null :
+      find(
+        option => isEqual(option.value, value),
+        this.constrainedOptions(this.props.getOptionIsDisabled, this.props.bases)
+      );
 
   handleChange = option => this.props.onChange(option.value);
 
@@ -251,6 +280,7 @@ export default class GroupingSelector extends React.Component {
     return (
       <Select
         isSearchable
+        placeholder={'Type here to search list...'}
         options={arrangedOptions}
         components={this.props.components}
         value={this.optionFor(valueToUse)}

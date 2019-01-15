@@ -3,7 +3,7 @@ import { Grid, Row, Col, Button, Glyphicon } from 'react-bootstrap';
 import memoize from 'memoize-one';
 import {
   flow, takeWhile, slice, map, reduce, filter, tap,
-  sortBy
+  sortBy, get,
 } from 'lodash/fp';
 import { objUnion } from '../../../utils/fp';
 import _ from 'lodash';
@@ -24,9 +24,7 @@ function stringify(obj) {
 class DemoMEV extends Component {
   state = {
     mev: {
-      model: {
-        // model_id: 'CanESM2',
-      },
+      model: null,
       emissions: {
         // experiment: 'historical, rcp45',
       },
@@ -85,7 +83,7 @@ class DemoMEV extends Component {
           <ModelSelector
             bases={meta}
             constraint={this.anySelectorConstraint('model', this.state.selectorOrder, this.state.mev)}
-            value={this.state.mev.model.model_id}
+            value={this.state.mev.model && this.state.mev.model.model_id}
             onChange={this.anyHandleChangeModel}
           />
           {stringify(this.state.mev[sel])}
