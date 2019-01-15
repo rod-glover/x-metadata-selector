@@ -34,7 +34,7 @@ export default class DatasetSelector extends Component {
   // Return an option label including the user-friendly 'Run <n>' names
   // for ensemble_member values.
   getOptionLabel = ({ value: { start_date, end_date, ensemble_member }}) => {
-    const eMT = DatasetSelector.ensembleMemberTranslation(this.props.meta);
+    const eMT = DatasetSelector.ensembleMemberTranslation(this.props.bases);
     return `${eMT[ensemble_member]} (${ensemble_member}), ${start_date}–${end_date}`;
   };
   
