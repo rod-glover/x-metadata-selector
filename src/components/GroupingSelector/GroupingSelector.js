@@ -311,10 +311,8 @@ export default class GroupingSelector extends React.Component {
     this.log(`.render: return`)
     return (
       <Select
-        isSearchable
-        placeholder={'Type here to search list...'}
+        {...this.props}
         options={arrangedOptions}
-        components={this.props.components}
         value={this.optionFor(this.valueToUse)}
         onChange={this.handleChange}
       />
