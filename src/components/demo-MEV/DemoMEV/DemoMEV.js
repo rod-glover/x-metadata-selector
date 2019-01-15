@@ -24,7 +24,7 @@ function stringify(obj) {
 class DemoMEV extends Component {
   state = {
     mev: {
-      model: null,
+      model: undefined,
       emissions: {
         // experiment: 'historical, rcp45',
       },
@@ -35,6 +35,7 @@ class DemoMEV extends Component {
       },
     },
     selectorOrder: 'model emissions variable'.split(' '),
+    // selectorOrder: 'model'.split(' '),
     dataset: {
       // "start_date": "1961",
       // "end_date": "1990",

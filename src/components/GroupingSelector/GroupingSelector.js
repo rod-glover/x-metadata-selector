@@ -136,14 +136,13 @@ export default class GroupingSelector extends React.Component {
     arrangeOptions: options => sortBy('label')(options),
 
     replaceInvalidValue: options => {
-      console.log(`replaceInvalidValue: options`, options)
+      // Return first (in order of UI presentation) enabled option,
+      // or else null if no such option exists.
       const allOptions =
         options[0] && isArray(options[0].options) ?
-          flatMap('options')(options) :
-          options;
-      console.log(`replaceInvalidValue: allOptions`, allOptions)
+          flatMap('options')(options) :  // grouped
+          options;                       // ungrouped
       const firstEnabledOption = find({ isDisabled: false }, allOptions);
-      console.log(`replaceInvalidValue: firstEnabledOption`, firstEnabledOption)
       return firstEnabledOption ? firstEnabledOption.value : null;
     },
 
@@ -154,16 +153,26 @@ export default class GroupingSelector extends React.Component {
 
   constructor(props) {
     super(props);
-    console.log(`MetadataSelector[${this.props.debugValue}].cons: meta:`, objectId(props.bases), props.bases)
+    console.log(`GroupingSelector[${this.props.debugValue}].cons: meta:`, objectId(props.bases), props.bases)
   }
 
   componentDidMount() {
-    console.log(`MetadataSelector[${this.props.debugValue}].componentDidMount`)
+    console.log(`GroupingSelector[${this.props.debugValue}].componentDidMount`)
+    if (!isUndefined(this.valueToUse)) {
+      console.log(`GroupingSelector[${this.props.debugValue}].cDM: onChange:`)
+      this.props.onChange(this.valueToUse);
+      this.valueToUse = undefined;
+    }
   }
 
   componentDidUpdate(prevProps) {
-    console.log(`MetadataSelector[${this.props.debugValue}].cDU: meta:`, objectId(this.props.bases))
-    console.log(`MetadataSelector[${this.props.debugValue}].componentDidMount: props.meta ${this.props.bases === prevProps.bases ? '===' : '!=='} prevProps.meta`)
+    console.log(`GroupingSelector[${this.props.debugValue}].cDU: meta:`, objectId(this.props.bases))
+    console.log(`GroupingSelector[${this.props.debugValue}].componentDidMount: props.meta ${this.props.bases === prevProps.bases ? '===' : '!=='} prevProps.meta`)
+    if (!isUndefined(this.valueToUse)) {
+      console.log(`GroupingSelector[${this.props.debugValue}].cDU: onChange:`)
+      this.props.onChange(this.valueToUse);
+      this.valueToUse = undefined;
+    }
   }
 
   // Memoize computation of options list
@@ -194,7 +203,7 @@ export default class GroupingSelector extends React.Component {
   allOptions = memoize(
     (getOptionValue, getOptionLabel, meta) =>
       flow(
-        tap(meta => console.log(`MetadataSelector[${this.props.debugValue}].allOptions: meta:`, objectId(meta), meta)),
+        tap(meta => console.log(`GroupingSelector[${this.props.debugValue}].allOptions: meta:`, objectId(meta), meta)),
         map(m => ({
           context: m,
           value: getOptionValue(m),
@@ -215,12 +224,12 @@ export default class GroupingSelector extends React.Component {
   constrainedOptions = memoize(
     (getOptionIsDisabled, meta) => flow(
       tap(options => {
-        console.log(`MetadataSelector[${this.props.debugValue}].constrainedOptions: meta:`, objectId(meta), meta, 'getOptionIsDisabled:', objectId(getOptionIsDisabled));
-        console.log(`MetadataSelector[${this.props.debugValue}].constrainedOptions: options:`, objectId(options), options);
+        console.log(`GroupingSelector[${this.props.debugValue}].constrainedOptions: meta:`, objectId(meta), meta, 'getOptionIsDisabled:', objectId(getOptionIsDisabled));
+        console.log(`GroupingSelector[${this.props.debugValue}].constrainedOptions: options:`, objectId(options), options);
       }),
       map(option =>
         assign(option, { isDisabled: getOptionIsDisabled(option) })),
-      tap(options => console.log(`MetadataSelector[${this.props.debugValue}].constrainedOptions: result`, options))
+      tap(options => console.log(`GroupingSelector[${this.props.debugValue}].constrainedOptions: result`, options))
     )(
       // Can't curry a memoized function; have to put it into the flow manually
       this.allOptions(
@@ -253,17 +262,17 @@ export default class GroupingSelector extends React.Component {
   handleChange = option => this.props.onChange(option.value);
 
   render() {
-    console.log(`MetadataSelector[${this.props.debugValue}].render`)
+    console.log(`GroupingSelector[${this.props.debugValue}].render`)
     // TODO: Pass through all the Select props.
 
-    console.log(`MetadataSelector[${this.props.debugValue}].render: arrangedOptions: meta:`, objectId(this.props.bases), this.props.bases)
+    console.log(`GroupingSelector[${this.props.debugValue}].render: arrangedOptions: meta:`, objectId(this.props.bases), this.props.bases)
     const arrangedOptions =
       this.props.arrangeOptions(
         this.constrainedOptions(
           this.props.getOptionIsDisabled,
           this.props.bases,
         ));
-    console.log(`MetadataSelector[${this.props.debugValue}].render: arrangedOptions: result:`, arrangedOptions)
+    console.log(`GroupingSelector[${this.props.debugValue}].render: arrangedOptions: result:`, arrangedOptions)
 
 
     let valueToUse = this.props.value;
@@ -273,10 +282,12 @@ export default class GroupingSelector extends React.Component {
         // this.constrainedOptions(this.props.getOptionIsDisabled, this.props.bases)
         arrangedOptions
       );
-      this.props.onChange(valueToUse);
+      this.valueToUse = valueToUse;
+      // this.props.onChange(this.valueToUse);
+      return null;
     }
 
-    console.log(`MetadataSelector[${this.props.debugValue}].render: return`)
+    console.log(`GroupingSelector[${this.props.debugValue}].render: return`)
     return (
       <Select
         isSearchable
