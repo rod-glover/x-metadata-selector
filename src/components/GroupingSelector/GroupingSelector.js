@@ -56,7 +56,7 @@
 //    `null` is a valid value, and has the universal meaning, 'no selection'.
 //    Warning: This function must return a valid value, or an error will occur.
 //    By default, `replaceInvalidValue` is a function that returns the value
-//    of the first enabled option, or else `null` if no such option exists.
+//    of the first enabled option.
 
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -76,8 +76,8 @@ import {
   some,
   tap,
   isEqual,
-  isUndefined,
   isArray,
+  isFunction,
   noop,
 } from 'lodash/fp';
 import { groupByGeneral } from '../../utils/fp';
@@ -122,8 +122,9 @@ export default class GroupingSelector extends React.Component {
     // Called when value passed in is not a valid value.
     // Called with list of all options.
     // Must return a valid value.
-    // Beware: If you return an invalid value from this, you're screwed.
+    // Beware: If you always return an invalid value from this, you're screwed.
     
+    debug: PropTypes.bool,
     debugValue: PropTypes.any,
     // For debugging, what else?
   };
@@ -143,36 +144,51 @@ export default class GroupingSelector extends React.Component {
           flatMap('options')(options) :  // grouped
           options;                       // ungrouped
       const firstEnabledOption = find({ isDisabled: false }, allOptions);
-      return firstEnabledOption ? firstEnabledOption.value : null;
+      console.log(`GroupingSelector[...].replaceInvalidValue: firstEnabledOption:`, firstEnabledOption)
+      // This is sketchy, because if there is never any enabled option,
+      // it always returns `undefined`, which is invalid, and causes an infinite
+      // update loop. OTOH, if we convert the undefined to `null`, it can
+      // prematurely update the value to `null`, and that is both stable
+      // and wrong. This works for now.
+      // FIXME by adjusting the logic for replacement to allow checking for
+      // a valid value in the case that the last value was null. Then use
+      // the commented out line below to convert undefined to null.
+      return firstEnabledOption && firstEnabledOption.value;
+      // return firstEnabledOption ? firstEnabledOption.value : null;
     },
 
     onChange: noop,
 
+    debug: false,
     debugValue: '',
   };
+  
+  log(...args) {
+    if (this.props.debug) {
+      console.log(`GroupingSelector[${this.props.debugValue}]`, ...args);
+    }
+  }
+
+  condReplaceValue() {
+    if (this.willReplaceValue) {
+      this.log(`.updateInvalidValue: replacing with value:`, this.valueToUse)
+      this.props.onChange(this.valueToUse);
+    }
+  }
 
   constructor(props) {
     super(props);
-    console.log(`GroupingSelector[${this.props.debugValue}].cons: meta:`, objectId(props.bases), props.bases)
+    this.log(`.cons: meta:`, objectId(props.bases), props.bases)
   }
 
   componentDidMount() {
-    console.log(`GroupingSelector[${this.props.debugValue}].componentDidMount`)
-    if (!isUndefined(this.valueToUse)) {
-      console.log(`GroupingSelector[${this.props.debugValue}].cDM: onChange:`)
-      this.props.onChange(this.valueToUse);
-      this.valueToUse = undefined;
-    }
+    this.condReplaceValue();
   }
 
   componentDidUpdate(prevProps) {
-    console.log(`GroupingSelector[${this.props.debugValue}].cDU: meta:`, objectId(this.props.bases))
-    console.log(`GroupingSelector[${this.props.debugValue}].componentDidMount: props.meta ${this.props.bases === prevProps.bases ? '===' : '!=='} prevProps.meta`)
-    if (!isUndefined(this.valueToUse)) {
-      console.log(`GroupingSelector[${this.props.debugValue}].cDU: onChange:`)
-      this.props.onChange(this.valueToUse);
-      this.valueToUse = undefined;
-    }
+    this.log(`.cDU: meta:`, objectId(this.props.bases))
+    this.log(`.componentDidMount: props.meta ${this.props.bases === prevProps.bases ? '===' : '!=='} prevProps.meta`)
+    this.condReplaceValue();
   }
 
   // Memoize computation of options list
@@ -203,7 +219,7 @@ export default class GroupingSelector extends React.Component {
   allOptions = memoize(
     (getOptionValue, getOptionLabel, meta) =>
       flow(
-        tap(meta => console.log(`GroupingSelector[${this.props.debugValue}].allOptions: meta:`, objectId(meta), meta)),
+        tap(meta => this.log(`.allOptions: meta:`, objectId(meta), meta)),
         map(m => ({
           context: m,
           value: getOptionValue(m),
@@ -214,7 +230,7 @@ export default class GroupingSelector extends React.Component {
             value: group.by,
         })),
         map(option => assign(option, { label: getOptionLabel(option) })),
-        // tap(m => console.log(`GroupingSelector[${this.props.debugValue}].allOptions`, m)),
+        // tap(m => this.log(`.allOptions`, m)),
       )(meta)
   );
 
@@ -224,12 +240,13 @@ export default class GroupingSelector extends React.Component {
   constrainedOptions = memoize(
     (getOptionIsDisabled, meta) => flow(
       tap(options => {
-        console.log(`GroupingSelector[${this.props.debugValue}].constrainedOptions: meta:`, objectId(meta), meta, 'getOptionIsDisabled:', objectId(getOptionIsDisabled));
-        console.log(`GroupingSelector[${this.props.debugValue}].constrainedOptions: options:`, objectId(options), options);
+        this.log(`.constrainedOptions: meta:`, objectId(meta), meta, 'getOptionIsDisabled:', objectId(getOptionIsDisabled));
+        this.log(`.constrainedOptions: options:`, objectId(options), options);
       }),
       map(option =>
-        assign(option, { isDisabled: getOptionIsDisabled(option) })),
-      tap(options => console.log(`GroupingSelector[${this.props.debugValue}].constrainedOptions: result`, options))
+        assign(option, { isDisabled: getOptionIsDisabled(option) })
+      ),
+      tap(options => this.log(`.constrainedOptions: result`, options))
     )(
       // Can't curry a memoized function; have to put it into the flow manually
       this.allOptions(
@@ -245,6 +262,8 @@ export default class GroupingSelector extends React.Component {
   // `undefined` is not a valid value.
 
   isValidValue = value =>
+    // A value is valid if it is null or if it is (deep) equal to the value of
+    // some enabled option.
     value === null ||
     some(
       option => !option.isDisabled && isEqual(option.value, value),
@@ -252,6 +271,8 @@ export default class GroupingSelector extends React.Component {
     );
 
   optionFor = value =>
+    // The option for a value is null if the value is null, or the option
+    // whose value (deep) equals the value.
     value === null ?
       null :
       find(
@@ -262,39 +283,39 @@ export default class GroupingSelector extends React.Component {
   handleChange = option => this.props.onChange(option.value);
 
   render() {
-    console.log(`GroupingSelector[${this.props.debugValue}].render`)
+    this.log(`.render`)
     // TODO: Pass through all the Select props.
 
-    console.log(`GroupingSelector[${this.props.debugValue}].render: arrangedOptions: meta:`, objectId(this.props.bases), this.props.bases)
+    this.log(`.render: arrangedOptions: meta:`, objectId(this.props.bases), this.props.bases)
     const arrangedOptions =
       this.props.arrangeOptions(
         this.constrainedOptions(
           this.props.getOptionIsDisabled,
           this.props.bases,
         ));
-    console.log(`GroupingSelector[${this.props.debugValue}].render: arrangedOptions: result:`, arrangedOptions)
+    this.log(`.render: arrangedOptions: result:`, arrangedOptions)
 
+    // The following two values are picked up in `componentDidMount` and
+    // `componentDidUpdate` to call back (`onChange`) with the replaced value.
+    // React lifecycle prevents doing that here, because it ultimately causes
+    // a state change in the parent's render, which is forbidden.
+    this.willReplaceValue =
+      isFunction(this.props.replaceInvalidValue) &&
+      !this.isValidValue(this.props.value);
+    this.valueToUse =
+      this.willReplaceValue ?
+        this.props.replaceInvalidValue(arrangedOptions) :
+        this.props.value
+    ;
 
-    let valueToUse = this.props.value;
-    if (!this.isValidValue(valueToUse)) {
-      console.log(`MetadataSelector[${this.props.debugValue}].render: valueToUse`)
-      valueToUse = this.props.replaceInvalidValue(
-        // this.constrainedOptions(this.props.getOptionIsDisabled, this.props.bases)
-        arrangedOptions
-      );
-      this.valueToUse = valueToUse;
-      // this.props.onChange(this.valueToUse);
-      return null;
-    }
-
-    console.log(`GroupingSelector[${this.props.debugValue}].render: return`)
+    this.log(`.render: return`)
     return (
       <Select
         isSearchable
         placeholder={'Type here to search list...'}
         options={arrangedOptions}
         components={this.props.components}
-        value={this.optionFor(valueToUse)}
+        value={this.optionFor(this.valueToUse)}
         onChange={this.handleChange}
       />
     );
