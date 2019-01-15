@@ -56,11 +56,13 @@ export default class VariableSelector extends Component {
   render() {
     return (
       <ConstrainedMetadataSelector
-        {...this.props}
+        isSearchable
+        placeholder={'Type here to search list...'}
         getOptionValue={VariableSelector.getOptionValue}
         getOptionLabel={VariableSelector.getOptionLabel}
         arrangeOptions={VariableSelector.arrangeOptions}
         components={{ Option: VariableSelector.Option }}
+        {...this.props}
         debug={false}
         debugValue='Variable'
       />

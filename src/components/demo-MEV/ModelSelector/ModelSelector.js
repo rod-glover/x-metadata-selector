@@ -17,8 +17,8 @@ export default class ModelSelector extends Component {
   render() {
     return (
       <ConstrainedMetadataSelector
-        {...this.props}
         getOptionValue={ModelSelector.getOptionValue}
+        {...this.props}
         debug={false}
         debugValue='Model'
       />
