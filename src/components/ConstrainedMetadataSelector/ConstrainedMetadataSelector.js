@@ -36,8 +36,8 @@ export default class ConstrainedMetadataSelector extends React.Component {
   render() {
     return (
       <MetadataSelector
-        {...omit('constraint', this.props)}
         getOptionIsDisabled={this.makeGetOptionIsDisabled(this.props.constraint)}
+        {...omit('constraint', this.props)}
       />
     );
   }
